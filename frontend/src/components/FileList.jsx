@@ -13,15 +13,6 @@ function FileList({ files, folders, onRefresh, onFolderOpen }) {
     if (mimeType.includes('pdf') || mimeType.includes('document')) return <FileText className="w-5 h-5 text-red-500" />;
     return <FileIcon className="w-5 h-5 text-gray-400" />;
   };
-  const handleDelete = async (fileId) => {
-    if (!confirm('Are you sure you want to delete this file?')) return;
-    try {
-      await filesAPI.delete(fileId);
-      onRefresh();
-    } catch (error) {
-      alert('Failed to delete file');
-    }
-  };
   const handleDownload = async (file) => {
     try {
       const walrusUrl = getWalrusUrl(file.blobId);
