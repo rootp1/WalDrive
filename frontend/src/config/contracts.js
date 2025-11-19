@@ -9,5 +9,5 @@ export const MODULE_NAMES = {
 export const WALRUS_CONFIG = {
   AGGREGATOR_URL: 'https://aggregator.walrus-testnet.walrus.space',
   PUBLISHER_URL: 'https://publisher.walrus-testnet.walrus.space',
-  EPOCHS: 5,
+  EPOCHS: 1,
 };

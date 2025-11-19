@@ -1,16 +1,15 @@
 import { WALRUS_CONFIG } from '../config/contracts';
 
 export const uploadToWalrus = async (file) => {
-  const formData = new FormData();
-  formData.append('file', file);
-
-  const response = await fetch(`${WALRUS_CONFIG.PUBLISHER_URL}/v1/store?epochs=${WALRUS_CONFIG.EPOCHS}`, {
+  const response = await fetch(`${WALRUS_CONFIG.PUBLISHER_URL}/v1/blobs?epochs=${WALRUS_CONFIG.EPOCHS}`, {
     method: 'PUT',
     body: file,
   });
 
   if (!response.ok) {
-    throw new Error('Failed to upload to Walrus');
+    const errorText = await response.text();
+    console.error('Walrus upload error:', response.status, errorText);
+    throw new Error(`Failed to upload to Walrus: ${response.status} - ${errorText}`);
   }
 
   const result = await response.json();
