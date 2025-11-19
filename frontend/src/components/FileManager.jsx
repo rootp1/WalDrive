@@ -3,14 +3,12 @@ import { Upload, Grid, List } from 'lucide-react';
 import UploadModal from './UploadModal';
 import FileGrid from './FileGrid';
 import FileList from './FileList';
-
 function FileManager({ files, folders, currentFolder, loading, onRefresh, onFolderOpen }) {
   const [showUpload, setShowUpload] = useState(false);
-  const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
-
+  const [viewMode, setViewMode] = useState('grid'); 
   return (
     <div className="p-6">
-      {/* Header */}
+      {}
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-2xl font-bold text-white">
@@ -20,9 +18,8 @@ function FileManager({ files, folders, currentFolder, loading, onRefresh, onFold
             {files.length} files, {folders.length} folders
           </p>
         </div>
-
         <div className="flex items-center gap-3">
-          {/* View Mode Toggle */}
+          {}
           <div className="flex bg-gray-800 rounded-lg p-1">
             <button
               onClick={() => setViewMode('grid')}
@@ -47,8 +44,7 @@ function FileManager({ files, folders, currentFolder, loading, onRefresh, onFold
               <List className="w-4 h-4" />
             </button>
           </div>
-
-          {/* Upload Button */}
+          {}
           <button
             onClick={() => setShowUpload(true)}
             className="flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 rounded-lg font-medium transition-colors"
@@ -58,8 +54,7 @@ function FileManager({ files, folders, currentFolder, loading, onRefresh, onFold
           </button>
         </div>
       </div>
-
-      {/* Content */}
+      {}
       {loading ? (
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
@@ -91,8 +86,7 @@ function FileManager({ files, folders, currentFolder, loading, onRefresh, onFold
           onFolderOpen={onFolderOpen}
         />
       )}
-
-      {/* Upload Modal */}
+      {}
       {showUpload && (
         <UploadModal
           currentFolder={currentFolder}
@@ -106,5 +100,4 @@ function FileManager({ files, folders, currentFolder, loading, onRefresh, onFold
     </div>
   );
 }
-
 export default FileManager;

@@ -2,11 +2,9 @@ import { Folder, FileText, Image, Video, Music, File as FileIcon, Download, Tras
 import { useState } from 'react';
 import FilePreviewModal from './FilePreviewModal';
 import { filesAPI, foldersAPI } from '../services/api';
-
 function FileGrid({ files, folders, onRefresh, onFolderOpen }) {
   const [selectedFile, setSelectedFile] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
-
   const getFileIcon = (mimeType) => {
     if (!mimeType) return <FileIcon className="w-12 h-12" />;
     if (mimeType.startsWith('image/')) return <Image className="w-12 h-12 text-blue-500" />;
@@ -15,7 +13,6 @@ function FileGrid({ files, folders, onRefresh, onFolderOpen }) {
     if (mimeType.includes('pdf') || mimeType.includes('document')) return <FileText className="w-12 h-12 text-red-500" />;
     return <FileIcon className="w-12 h-12 text-gray-400" />;
   };
-
   const handleDelete = async (fileId) => {
     if (!confirm('Are you sure you want to delete this file?')) return;
     try {
@@ -25,17 +22,12 @@ function FileGrid({ files, folders, onRefresh, onFolderOpen }) {
       alert('Failed to delete file');
     }
   };
-
   const handleDownload = async (file) => {
     try {
       const response = await filesAPI.download(file._id);
-      // Get Walrus aggregator URL from response
       const walrusUrl = response.data.url;
       const filename = response.data.filename;
-      
       console.log('🔗 Downloading from Walrus:', walrusUrl);
-      
-      // Download directly from Walrus network
       const link = document.createElement('a');
       link.href = walrusUrl;
       link.setAttribute('download', filename);
@@ -47,7 +39,6 @@ function FileGrid({ files, folders, onRefresh, onFolderOpen }) {
       alert('Failed to download file');
     }
   };
-
   const handleTogglePublic = async (file) => {
     try {
       await filesAPI.update(file._id, { isPublic: !file.isPublic });
@@ -56,18 +47,16 @@ function FileGrid({ files, folders, onRefresh, onFolderOpen }) {
       alert('Failed to update file');
     }
   };
-
   const copyShareLink = (file) => {
     if (!file.shareLink) return;
     const link = `${window.location.origin}/share/${file.shareLink}`;
     navigator.clipboard.writeText(link);
     alert('Share link copied to clipboard!');
   };
-
   return (
     <div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {/* Folders */}
+        {}
         {folders.map((folder) => (
           <div
             key={folder._id}
@@ -82,14 +71,13 @@ function FileGrid({ files, folders, onRefresh, onFolderOpen }) {
             <p className="text-sm text-gray-400 mt-1">{folder.path}</p>
           </div>
         ))}
-
-        {/* Files */}
+        {}
         {files.map((file) => (
           <div
             key={file._id}
             className="group bg-gray-900 border border-gray-800 rounded-lg overflow-hidden hover:border-primary-600 transition-all"
           >
-            {/* Preview */}
+            {}
             <div
               onClick={() => {
                 setSelectedFile(file);
@@ -99,8 +87,7 @@ function FileGrid({ files, folders, onRefresh, onFolderOpen }) {
             >
               {getFileIcon(file.mimeType)}
             </div>
-
-            {/* Info */}
+            {}
             <div className="p-4">
               <div className="flex items-start justify-between mb-2">
                 <h3 className="font-medium text-white truncate flex-1">{file.name}</h3>
@@ -113,8 +100,7 @@ function FileGrid({ files, folders, onRefresh, onFolderOpen }) {
               <p className="text-xs text-gray-400">
                 {(file.size / 1024).toFixed(1)} KB • {new Date(file.uploadedAt).toLocaleDateString()}
               </p>
-
-              {/* Actions */}
+              {}
               <div className="flex items-center gap-2 mt-3">
                 <button
                   onClick={() => {
@@ -161,8 +147,7 @@ function FileGrid({ files, folders, onRefresh, onFolderOpen }) {
           </div>
         ))}
       </div>
-
-      {/* Preview Modal */}
+      {}
       {showPreview && selectedFile && (
         <FilePreviewModal
           file={selectedFile}
@@ -176,5 +161,4 @@ function FileGrid({ files, folders, onRefresh, onFolderOpen }) {
     </div>
   );
 }
-
 export default FileGrid;

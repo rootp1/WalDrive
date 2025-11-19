@@ -2,18 +2,15 @@ import { useState, useEffect } from 'react';
 import { Upload, Download, Trash2, Share2, FolderPlus, Eye, Edit, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { activityAPI } from '../services/api';
-
 function ActivityLog() {
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState(null);
   const navigate = useNavigate();
-
   useEffect(() => {
     loadActivities();
     loadStats();
   }, []);
-
   const loadActivities = async () => {
     try {
       setLoading(true);
@@ -25,7 +22,6 @@ function ActivityLog() {
       setLoading(false);
     }
   };
-
   const loadStats = async () => {
     try {
       const { data } = await activityAPI.getStats({ days: 7 });
@@ -34,7 +30,6 @@ function ActivityLog() {
       console.error('Failed to load stats:', error);
     }
   };
-
   const getActionIcon = (action) => {
     switch (action) {
       case 'upload':
@@ -57,7 +52,6 @@ function ActivityLog() {
         return <Eye className="w-5 h-5 text-gray-400" />;
     }
   };
-
   const getActionText = (action) => {
     const actions = {
       upload: 'uploaded',
@@ -71,7 +65,6 @@ function ActivityLog() {
     };
     return actions[action] || action;
   };
-
   const formatTimestamp = (timestamp) => {
     const date = new Date(timestamp);
     const now = new Date();
@@ -79,17 +72,15 @@ function ActivityLog() {
     const minutes = Math.floor(diff / 60000);
     const hours = Math.floor(diff / 3600000);
     const days = Math.floor(diff / 86400000);
-
     if (minutes < 1) return 'Just now';
     if (minutes < 60) return `${minutes}m ago`;
     if (hours < 24) return `${hours}h ago`;
     if (days < 7) return `${days}d ago`;
     return date.toLocaleDateString();
   };
-
   return (
     <div className="p-6">
-      {/* Header */}
+      {}
       <div className="flex items-center gap-4 mb-6">
         <button
           onClick={() => navigate('/drive')}
@@ -104,8 +95,7 @@ function ActivityLog() {
           </p>
         </div>
       </div>
-
-      {/* Stats */}
+      {}
       {stats && (
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
           {stats.byAction.map((stat) => (
@@ -124,8 +114,7 @@ function ActivityLog() {
           ))}
         </div>
       )}
-
-      {/* Activity List */}
+      {}
       {loading ? (
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
@@ -174,5 +163,4 @@ function ActivityLog() {
     </div>
   );
 }
-
 export default ActivityLog;

@@ -2,11 +2,9 @@ import { Folder, FileText, Image, Video, Music, File as FileIcon, Download, Tras
 import { useState } from 'react';
 import FilePreviewModal from './FilePreviewModal';
 import { filesAPI } from '../services/api';
-
 function FileList({ files, folders, onRefresh, onFolderOpen }) {
   const [selectedFile, setSelectedFile] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
-
   const getFileIcon = (mimeType) => {
     if (!mimeType) return <FileIcon className="w-5 h-5 text-gray-400" />;
     if (mimeType.startsWith('image/')) return <Image className="w-5 h-5 text-blue-500" />;
@@ -15,7 +13,6 @@ function FileList({ files, folders, onRefresh, onFolderOpen }) {
     if (mimeType.includes('pdf') || mimeType.includes('document')) return <FileText className="w-5 h-5 text-red-500" />;
     return <FileIcon className="w-5 h-5 text-gray-400" />;
   };
-
   const handleDelete = async (fileId) => {
     if (!confirm('Are you sure you want to delete this file?')) return;
     try {
@@ -25,17 +22,12 @@ function FileList({ files, folders, onRefresh, onFolderOpen }) {
       alert('Failed to delete file');
     }
   };
-
   const handleDownload = async (file) => {
     try {
       const response = await filesAPI.download(file._id);
-      // Get Walrus aggregator URL from response
       const walrusUrl = response.data.url;
       const filename = response.data.filename;
-      
       console.log('🔗 Downloading from Walrus:', walrusUrl);
-      
-      // Download directly from Walrus network
       const link = document.createElement('a');
       link.href = walrusUrl;
       link.setAttribute('download', filename);
@@ -47,7 +39,6 @@ function FileList({ files, folders, onRefresh, onFolderOpen }) {
       alert('Failed to download file');
     }
   };
-
   const handleTogglePublic = async (file) => {
     try {
       await filesAPI.update(file._id, { isPublic: !file.isPublic });
@@ -56,14 +47,12 @@ function FileList({ files, folders, onRefresh, onFolderOpen }) {
       alert('Failed to update file');
     }
   };
-
   const copyShareLink = (file) => {
     if (!file.shareLink) return;
     const link = `${window.location.origin}/share/${file.shareLink}`;
     navigator.clipboard.writeText(link);
     alert('Share link copied to clipboard!');
   };
-
   const formatFileSize = (bytes) => {
     if (bytes === 0) return '0 B';
     const k = 1024;
@@ -71,7 +60,6 @@ function FileList({ files, folders, onRefresh, onFolderOpen }) {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
   };
-
   return (
     <div className="bg-gray-900 rounded-lg border border-gray-800 overflow-hidden">
       <table className="w-full">
@@ -85,7 +73,7 @@ function FileList({ files, folders, onRefresh, onFolderOpen }) {
           </tr>
         </thead>
         <tbody>
-          {/* Folders */}
+          {}
           {folders.map((folder) => (
             <tr
               key={folder._id}
@@ -118,8 +106,7 @@ function FileList({ files, folders, onRefresh, onFolderOpen }) {
               <td className="px-6 py-4"></td>
             </tr>
           ))}
-
-          {/* Files */}
+          {}
           {files.map((file) => (
             <tr key={file._id} className="border-b border-gray-800 hover:bg-gray-850 transition-colors">
               <td className="px-6 py-4">
@@ -195,8 +182,7 @@ function FileList({ files, folders, onRefresh, onFolderOpen }) {
           ))}
         </tbody>
       </table>
-
-      {/* Preview Modal */}
+      {}
       {showPreview && selectedFile && (
         <FilePreviewModal
           file={selectedFile}
@@ -210,5 +196,4 @@ function FileList({ files, folders, onRefresh, onFolderOpen }) {
     </div>
   );
 }
-
 export default FileList;

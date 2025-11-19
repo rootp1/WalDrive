@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-
 const fileSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -23,14 +22,14 @@ const fileSchema = new mongoose.Schema({
     unique: true,
   },
   owner: {
-    type: String, // Wallet address
+    type: String, 
     required: true,
     index: true,
   },
   folder: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Folder',
-    default: null, // null means root folder
+    default: null, 
   },
   isPublic: {
     type: Boolean,
@@ -39,7 +38,7 @@ const fileSchema = new mongoose.Schema({
   shareLink: {
     type: String,
     unique: true,
-    sparse: true, // Only create index for non-null values
+    sparse: true, 
   },
   description: {
     type: String,
@@ -56,15 +55,13 @@ const fileSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-  // Metadata for preview
   thumbnail: {
-    type: String, // Walrus ID for thumbnail if generated
+    type: String, 
   },
   metadata: {
     type: mongoose.Schema.Types.Mixed,
     default: {},
   },
-  // Access tracking
   views: {
     type: Number,
     default: 0,
@@ -74,19 +71,14 @@ const fileSchema = new mongoose.Schema({
     default: 0,
   },
 });
-
-// Update timestamp on modification
 fileSchema.pre('save', function(next) {
   this.updatedAt = new Date();
   next();
 });
-
-// Generate share link if public
 fileSchema.methods.generateShareLink = function() {
   if (this.isPublic && !this.shareLink) {
     this.shareLink = `${this._id}-${Date.now().toString(36)}`;
   }
   return this.shareLink;
 };
-
 module.exports = mongoose.model('File', fileSchema);

@@ -1,7 +1,6 @@
 import { useState, useRef } from 'react';
 import { X, Upload, File, Check } from 'lucide-react';
 import { filesAPI } from '../services/api';
-
 function UploadModal({ currentFolder, onClose, onSuccess }) {
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
@@ -9,20 +8,16 @@ function UploadModal({ currentFolder, onClose, onSuccess }) {
   const [isPublic, setIsPublic] = useState(false);
   const [description, setDescription] = useState('');
   const fileInputRef = useRef(null);
-
   const handleFileSelect = (e) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
       setFile(selectedFile);
     }
   };
-
   const handleUpload = async () => {
     if (!file) return;
-
     setUploading(true);
     setProgress(0);
-
     try {
       const formData = new FormData();
       formData.append('file', file);
@@ -31,14 +26,12 @@ function UploadModal({ currentFolder, onClose, onSuccess }) {
       if (currentFolder) {
         formData.append('folderId', currentFolder._id);
       }
-
       await filesAPI.upload(formData, (progressEvent) => {
         const percentCompleted = Math.round(
           (progressEvent.loaded * 100) / progressEvent.total
         );
         setProgress(percentCompleted);
       });
-
       onSuccess();
     } catch (error) {
       console.error('Upload failed:', error);
@@ -47,7 +40,6 @@ function UploadModal({ currentFolder, onClose, onSuccess }) {
       setUploading(false);
     }
   };
-
   const formatFileSize = (bytes) => {
     if (bytes === 0) return '0 B';
     const k = 1024;
@@ -55,11 +47,10 @@ function UploadModal({ currentFolder, onClose, onSuccess }) {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
   };
-
   return (
     <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
       <div className="bg-gray-900 rounded-xl max-w-lg w-full border border-gray-800 animate-slideUp">
-        {/* Header */}
+        {}
         <div className="flex items-center justify-between p-6 border-b border-gray-800">
           <h3 className="text-xl font-bold text-white">Upload File</h3>
           <button
@@ -70,10 +61,9 @@ function UploadModal({ currentFolder, onClose, onSuccess }) {
             <X className="w-5 h-5" />
           </button>
         </div>
-
-        {/* Content */}
+        {}
         <div className="p-6 space-y-4">
-          {/* File Input */}
+          {}
           <div>
             <input
               ref={fileInputRef}
@@ -111,8 +101,7 @@ function UploadModal({ currentFolder, onClose, onSuccess }) {
               </div>
             )}
           </div>
-
-          {/* Description */}
+          {}
           <div>
             <label className="block text-sm font-medium text-gray-400 mb-2">
               Description (optional)
@@ -126,8 +115,7 @@ function UploadModal({ currentFolder, onClose, onSuccess }) {
               disabled={uploading}
             />
           </div>
-
-          {/* Public/Private Toggle */}
+          {}
           <div className="flex items-center justify-between p-4 bg-gray-800 rounded-lg">
             <div>
               <p className="font-medium text-white">Make file public</p>
@@ -147,8 +135,7 @@ function UploadModal({ currentFolder, onClose, onSuccess }) {
               />
             </button>
           </div>
-
-          {/* Progress */}
+          {}
           {uploading && (
             <div>
               <div className="flex items-center justify-between text-sm mb-2">
@@ -164,8 +151,7 @@ function UploadModal({ currentFolder, onClose, onSuccess }) {
             </div>
           )}
         </div>
-
-        {/* Footer */}
+        {}
         <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-800">
           <button
             onClick={onClose}
@@ -196,5 +182,4 @@ function UploadModal({ currentFolder, onClose, onSuccess }) {
     </div>
   );
 }
-
 export default UploadModal;

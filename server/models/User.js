@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-
 const userSchema = new mongoose.Schema({
   walletAddress: {
     type: String,
@@ -15,11 +14,11 @@ const userSchema = new mongoose.Schema({
   },
   storageUsed: {
     type: Number,
-    default: 0, // in bytes
+    default: 0, 
   },
   storageLimit: {
     type: Number,
-    default: 5368709120, // 5GB in bytes
+    default: 5368709120, 
   },
   createdAt: {
     type: Date,
@@ -30,11 +29,8 @@ const userSchema = new mongoose.Schema({
     default: Date.now,
   },
 });
-
-// Update last active on save
 userSchema.pre('save', function(next) {
   this.lastActive = new Date();
   next();
 });
-
 module.exports = mongoose.model('User', userSchema);

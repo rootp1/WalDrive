@@ -6,16 +6,13 @@ import Landing from './pages/Landing';
 import Dashboard from './pages/Dashboard';
 import SharedFile from './pages/SharedFile';
 import './App.css';
-
 function App() {
   const currentAccount = useCurrentAccount();
-
   useEffect(() => {
     const loginUser = async () => {
       if (currentAccount?.address) {
         setWalletAddress(currentAccount.address);
         try {
-          // Login/register the user when wallet connects
           await authAPI.login(currentAccount.address);
         } catch (error) {
           console.error('Login failed:', error);
@@ -24,10 +21,8 @@ function App() {
         setWalletAddress(null);
       }
     };
-
     loginUser();
   }, [currentAccount]);
-
   return (
     <div className="min-h-screen bg-black">
       <Routes>
@@ -39,5 +34,4 @@ function App() {
     </div>
   );
 }
-
 export default App;

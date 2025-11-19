@@ -1,16 +1,13 @@
 import { useState } from 'react';
 import { Home, Folder, Plus, FolderPlus } from 'lucide-react';
 import { foldersAPI } from '../services/api';
-
 function Sidebar({ isOpen, folders, currentFolder, onFolderSelect, onRefresh }) {
   const [showNewFolder, setShowNewFolder] = useState(false);
   const [newFolderName, setNewFolderName] = useState('');
   const [creating, setCreating] = useState(false);
-
   const handleCreateFolder = async (e) => {
     e.preventDefault();
     if (!newFolderName.trim()) return;
-
     setCreating(true);
     try {
       await foldersAPI.create({
@@ -27,9 +24,7 @@ function Sidebar({ isOpen, folders, currentFolder, onFolderSelect, onRefresh }) 
       setCreating(false);
     }
   };
-
   if (!isOpen) return null;
-
   return (
     <aside className="w-64 bg-gray-900 border-r border-gray-800 flex flex-col">
       <div className="p-4 border-b border-gray-800">
@@ -45,7 +40,6 @@ function Sidebar({ isOpen, folders, currentFolder, onFolderSelect, onRefresh }) 
           <span className="font-medium">My Drive</span>
         </button>
       </div>
-
       <div className="flex-1 overflow-auto custom-scrollbar p-4">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-semibold text-gray-400 uppercase">Folders</h3>
@@ -57,7 +51,6 @@ function Sidebar({ isOpen, folders, currentFolder, onFolderSelect, onRefresh }) 
             <FolderPlus className="w-4 h-4 text-gray-400" />
           </button>
         </div>
-
         {showNewFolder && (
           <form onSubmit={handleCreateFolder} className="mb-3">
             <input
@@ -89,7 +82,6 @@ function Sidebar({ isOpen, folders, currentFolder, onFolderSelect, onRefresh }) 
             </div>
           </form>
         )}
-
         <div className="space-y-1">
           {folders.filter(f => !f.parent).map((folder) => (
             <button
@@ -110,5 +102,4 @@ function Sidebar({ isOpen, folders, currentFolder, onFolderSelect, onRefresh }) 
     </aside>
   );
 }
-
 export default Sidebar;

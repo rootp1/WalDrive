@@ -2,3 +2,4 @@ server/node_modules
 MystenLabs walrus main docs-examples
 server/cache
 .env
+remove_comments.sh

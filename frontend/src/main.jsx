@@ -7,9 +7,7 @@ import { networkConfig } from './config/sui.js';
 import App from './App.jsx';
 import './index.css';
 import '@mysten/dapp-kit/dist/index.css';
-
 const queryClient = new QueryClient();
-
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>

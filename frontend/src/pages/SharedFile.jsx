@@ -2,18 +2,15 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Download, Eye, ArrowLeft, FileText, Image, Video, Music, File as FileIcon } from 'lucide-react';
 import { filesAPI } from '../services/api';
-
 function SharedFile() {
   const { shareLink } = useParams();
   const navigate = useNavigate();
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
   useEffect(() => {
     loadSharedFile();
   }, [shareLink]);
-
   const loadSharedFile = async () => {
     try {
       setLoading(true);
@@ -26,12 +23,10 @@ function SharedFile() {
       setLoading(false);
     }
   };
-
   const handleDownload = () => {
     if (!file || !file.aggregatorUrl) return;
     window.open(file.aggregatorUrl, '_blank');
   };
-
   const getFileIcon = (mimeType) => {
     if (!mimeType) return <FileIcon className="w-24 h-24 text-gray-400" />;
     if (mimeType.startsWith('image/')) return <Image className="w-24 h-24 text-blue-500" />;
@@ -40,7 +35,6 @@ function SharedFile() {
     if (mimeType.includes('pdf') || mimeType.includes('document')) return <FileText className="w-24 h-24 text-red-500" />;
     return <FileIcon className="w-24 h-24 text-gray-400" />;
   };
-
   const formatFileSize = (bytes) => {
     if (bytes === 0) return '0 B';
     const k = 1024;
@@ -48,7 +42,6 @@ function SharedFile() {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
   };
-
   if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
@@ -56,7 +49,6 @@ function SharedFile() {
       </div>
     );
   }
-
   if (error) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center p-4">
@@ -81,13 +73,11 @@ function SharedFile() {
       </div>
     );
   }
-
   const isImage = file?.mimeType?.startsWith('image/');
   const isVideo = file?.mimeType?.startsWith('video/');
-
   return (
     <div className="min-h-screen bg-black">
-      {/* Header */}
+      {}
       <header className="bg-gray-900 border-b border-gray-800 px-4 py-3">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -110,11 +100,10 @@ function SharedFile() {
           </button>
         </div>
       </header>
-
-      {/* Content */}
+      {}
       <div className="max-w-5xl mx-auto p-6">
         <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
-          {/* File Info */}
+          {}
           <div className="p-6 border-b border-gray-800">
             <div className="flex items-start gap-4">
               {getFileIcon(file.mimeType)}
@@ -131,8 +120,7 @@ function SharedFile() {
               </div>
             </div>
           </div>
-
-          {/* Preview */}
+          {}
           <div className="p-6 bg-black">
             {isImage ? (
               <div className="flex items-center justify-center">
@@ -167,8 +155,7 @@ function SharedFile() {
             )}
           </div>
         </div>
-
-        {/* Footer */}
+        {}
         <div className="mt-6 text-center text-gray-500 text-sm">
           <p>Powered by Walrus Decentralized Storage</p>
         </div>
@@ -176,5 +163,4 @@ function SharedFile() {
     </div>
   );
 }
-
 export default SharedFile;

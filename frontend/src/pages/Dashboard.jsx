@@ -5,7 +5,6 @@ import Sidebar from '../components/Sidebar';
 import FileManager from '../components/FileManager';
 import ActivityLog from '../components/ActivityLog';
 import { filesAPI, foldersAPI, authAPI } from '../services/api';
-
 function Dashboard() {
   const [user, setUser] = useState(null);
   const [files, setFiles] = useState([]);
@@ -13,13 +12,11 @@ function Dashboard() {
   const [currentFolder, setCurrentFolder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-
   useEffect(() => {
     loadUserData();
     loadFolders();
     loadFiles();
   }, []);
-
   useEffect(() => {
     if (currentFolder) {
       loadFiles(currentFolder._id);
@@ -29,7 +26,6 @@ function Dashboard() {
       loadFolders(null);
     }
   }, [currentFolder]);
-
   const loadUserData = async () => {
     try {
       const { data } = await authAPI.getMe();
@@ -38,7 +34,6 @@ function Dashboard() {
       console.error('Failed to load user:', error);
     }
   };
-
   const loadFolders = async (parentId = null) => {
     try {
       const { data } = await foldersAPI.getAll({ parentId });
@@ -47,7 +42,6 @@ function Dashboard() {
       console.error('Failed to load folders:', error);
     }
   };
-
   const loadFiles = async (folderId = null) => {
     try {
       setLoading(true);
@@ -59,17 +53,14 @@ function Dashboard() {
       setLoading(false);
     }
   };
-
   const handleFolderSelect = (folder) => {
     setCurrentFolder(folder);
   };
-
   const handleRefresh = () => {
     loadFiles(currentFolder?._id);
     loadFolders(currentFolder?._id);
     loadUserData();
   };
-
   return (
     <div className="flex flex-col h-screen bg-black">
       <Header
@@ -77,7 +68,6 @@ function Dashboard() {
         onRefresh={handleRefresh}
         toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
       />
-
       <div className="flex flex-1 overflow-hidden">
         <Sidebar
           isOpen={sidebarOpen}
@@ -86,7 +76,6 @@ function Dashboard() {
           onFolderSelect={handleFolderSelect}
           onRefresh={loadFolders}
         />
-
         <main className="flex-1 overflow-auto custom-scrollbar">
           <Routes>
             <Route
@@ -109,5 +98,4 @@ function Dashboard() {
     </div>
   );
 }
-
 export default Dashboard;

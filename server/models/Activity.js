@@ -1,8 +1,7 @@
 const mongoose = require('mongoose');
-
 const activitySchema = new mongoose.Schema({
   user: {
-    type: String, // Wallet address
+    type: String, 
     required: true,
     index: true,
   },
@@ -37,9 +36,6 @@ const activitySchema = new mongoose.Schema({
     index: true,
   },
 });
-
-// Compound index for efficient queries
 activitySchema.index({ user: 1, timestamp: -1 });
 activitySchema.index({ user: 1, action: 1, timestamp: -1 });
-
 module.exports = mongoose.model('Activity', activitySchema);
