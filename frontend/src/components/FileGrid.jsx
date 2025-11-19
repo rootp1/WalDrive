@@ -70,20 +70,21 @@ function FileGrid({ files, folders, onRefresh, onFolderOpen }) {
     <div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {}
-        {folders.map((folder) => (
-          <div
-            key={folder._id}
-            onClick={() => onFolderOpen(folder)}
-            className="group bg-gray-900 border border-gray-800 rounded-lg p-4 hover:border-primary-600 transition-all cursor-pointer"
-          >
-            <div className="flex items-center justify-between mb-3">
-              <Folder className="w-12 h-12 text-primary-500" />
-              {folder.isPublic && <Globe className="w-4 h-4 text-gray-400" />}
+                  {folders.map((folder) => (
+            <div
+              key={folder.id}
+              onClick={() => onFolderOpen(folder)}
+              className="bg-gray-800 rounded-lg p-4 border border-gray-700 hover:border-primary-500 transition-all cursor-pointer group"
+            >
+              <div className="flex items-start justify-between mb-3">
+                <Folder className="w-12 h-12 text-primary-500" />
+              </div>
+              <h3 className="font-medium text-white truncate mb-1">{folder.name}</h3>
+              <div className="flex items-center gap-2 text-xs text-gray-400">
+                <span>Folder</span>
+              </div>
             </div>
-            <h3 className="font-medium text-white truncate">{folder.name}</h3>
-            <p className="text-sm text-gray-400 mt-1">{folder.path}</p>
-          </div>
-        ))}
+          ))}
         {}
         {files.map((file) => (
           <div
@@ -125,36 +126,27 @@ function FileGrid({ files, folders, onRefresh, onFolderOpen }) {
                 >
                   <Eye className="w-4 h-4" />
                 </button>
-                <button
-                  onClick={() => handleDownload(file)}
-                  className="p-1.5 hover:bg-gray-800 rounded transition-colors"
-                  title="Download"
-                >
-                  <Download className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => handleTogglePublic(file)}
-                  className="p-1.5 hover:bg-gray-800 rounded transition-colors"
-                  title={file.isPublic ? 'Make Private' : 'Make Public'}
-                >
-                  {file.isPublic ? <Globe className="w-4 h-4 text-green-500" /> : <Lock className="w-4 h-4" />}
-                </button>
-                {file.isPublic && file.shareLink && (
-                  <button
-                    onClick={() => copyShareLink(file)}
-                    className="p-1.5 hover:bg-gray-800 rounded transition-colors"
-                    title="Copy Share Link"
-                  >
-                    <Share2 className="w-4 h-4" />
-                  </button>
-                )}
-                <button
-                  onClick={() => handleDelete(file._id)}
-                  className="p-1.5 hover:bg-red-900/20 hover:text-red-500 rounded transition-colors ml-auto"
-                  title="Delete"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                              <button
+                onClick={() => handleDownload(file)}
+                className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+                title="Download"
+              >
+                <Download className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => handleTogglePublic(file)}
+                className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+                title={file.isPublic ? 'Make Private' : 'Make Public'}
+              >
+                {file.isPublic ? <Globe className="w-4 h-4 text-green-500" /> : <Lock className="w-4 h-4" />}
+              </button>
+              <button
+                onClick={() => handleDelete(file.id)}
+                className="p-2 hover:bg-gray-700 rounded-lg transition-colors text-red-400"
+                title="Delete"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
               </div>
             </div>
           </div>

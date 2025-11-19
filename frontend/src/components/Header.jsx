@@ -1,20 +1,12 @@
-import { useCurrentAccount, useDisconnectWallet } from '@mysten/dapp-kit';
-import { Menu, RefreshCw, LogOut, User, Activity } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-function Header({ user, onRefresh, toggleSidebar }) {
+import { ConnectButton, useCurrentAccount } from '@mysten/dapp-kit';
+import { Menu } from 'lucide-react';
+
+function Header({ toggleSidebar }) {
   const currentAccount = useCurrentAccount();
-  const { mutate: disconnect } = useDisconnectWallet();
-  const navigate = useNavigate();
+
   const formatAddress = (address) => {
     if (!address) return '';
     return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
-  };
-  const formatStorage = (bytes) => {
-    if (bytes === 0) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
   };
   return (
     <header className="bg-gray-900 border-b border-gray-800 px-4 py-3">

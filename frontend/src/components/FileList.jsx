@@ -78,36 +78,30 @@ function FileList({ files, folders, onRefresh, onFolderOpen }) {
         </thead>
         <tbody>
           {}
-          {folders.map((folder) => (
+                    {folders.map((folder) => (
             <tr
-              key={folder._id}
+              key={folder.id}
               onClick={() => onFolderOpen(folder)}
-              className="border-b border-gray-800 hover:bg-gray-850 cursor-pointer transition-colors"
+              className="border-b border-gray-800 hover:bg-gray-850 transition-colors cursor-pointer"
             >
               <td className="px-6 py-4">
                 <div className="flex items-center gap-3">
                   <Folder className="w-5 h-5 text-primary-500 flex-shrink-0" />
-                  <span className="text-white font-medium truncate">{folder.name}</span>
+                  <span className="font-medium">{folder.name}</span>
                 </div>
               </td>
-              <td className="px-6 py-4 text-sm text-gray-400 hidden md:table-cell">—</td>
-              <td className="px-6 py-4 text-sm text-gray-400 hidden lg:table-cell">
+              <td className="px-6 py-4 text-gray-400 text-sm hidden md:table-cell">-</td>
+              <td className="px-6 py-4 text-gray-400 text-sm hidden lg:table-cell">
                 {new Date(folder.createdAt).toLocaleDateString()}
               </td>
               <td className="px-6 py-4">
                 {folder.isPublic ? (
-                  <span className="inline-flex items-center gap-1 text-sm text-green-500">
-                    <Globe className="w-4 h-4" />
-                    Public
-                  </span>
+                  <Globe className="w-4 h-4 text-green-500" />
                 ) : (
-                  <span className="inline-flex items-center gap-1 text-sm text-gray-400">
-                    <Lock className="w-4 h-4" />
-                    Private
-                  </span>
+                  <Lock className="w-4 h-4 text-gray-400" />
                 )}
               </td>
-              <td className="px-6 py-4"></td>
+              <td className="px-6 py-4 text-right">-</td>
             </tr>
           ))}
           {}

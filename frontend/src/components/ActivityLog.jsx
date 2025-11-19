@@ -2,7 +2,11 @@ import { useState, useEffect } from 'react';
 import { Upload, Download, Trash2, Share2, FolderPlus, Eye, Edit, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { activityAPI } from '../services/api';
+import { Clock, Upload, Download, Trash2, FolderPlus, Edit } from 'lucide-react';
+
 function ActivityLog() {
+  const loading = false;
+  const activities = [];
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState(null);
