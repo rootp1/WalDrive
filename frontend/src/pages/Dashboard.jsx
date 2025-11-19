@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCurrentAccount } from '@mysten/dapp-kit';
 import Header from '../components/Header';
@@ -12,20 +12,12 @@ function Dashboard() {
   const [currentFolder, setCurrentFolder] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [view, setView] = useState('files');
+
   useEffect(() => {
-    loadUserData();
-    loadFolders();
-    loadFiles();
-  }, []);
-  useEffect(() => {
-    if (currentFolder) {
-      loadFiles(currentFolder._id);
-      loadFolders(currentFolder._id);
-    } else {
-      loadFiles(null);
-      loadFolders(null);
+    if (!currentAccount) {
+      navigate('/');
     }
-  }, [currentFolder]);
+  }, [currentAccount, navigate]);
   const loadUserData = async () => {
     try {
       const { data } = await authAPI.getMe();
