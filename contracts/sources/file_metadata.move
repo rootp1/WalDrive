@@ -1,6 +1,9 @@
 module waldrive::file_metadata {
     use std::string::String;
     use std::option::{Self, Option};
+    use sui::object::{Self, UID, ID};
+    use sui::tx_context::TxContext;
+    use sui::transfer;
     use sui::event;
 
     // ===== Structs =====
