@@ -1,10 +1,14 @@
 import { Folder, FileText, Image, Video, Music, File as FileIcon, Download, Trash2, Share2, Eye, Lock, Globe } from 'lucide-react';
 import { useState } from 'react';
 import FilePreviewModal from './FilePreviewModal';
-import { filesAPI, foldersAPI } from '../services/api';
+import { useSignAndExecuteTransaction } from '@mysten/dapp-kit';
+import { deleteFileTransaction, toggleFilePublicTransaction } from '../services/sui';
+import { getWalrusUrl } from '../services/walrus';
+
 function FileGrid({ files, folders, onRefresh, onFolderOpen }) {
   const [selectedFile, setSelectedFile] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
+  const { mutate: signAndExecute } = useSignAndExecuteTransaction();
   const getFileIcon = (mimeType) => {
     if (!mimeType) return <FileIcon className="w-12 h-12" />;
     if (mimeType.startsWith('image/')) return <Image className="w-12 h-12 text-blue-500" />;
@@ -16,21 +20,24 @@ function FileGrid({ files, folders, onRefresh, onFolderOpen }) {
   const handleDelete = async (fileId) => {
     if (!confirm('Are you sure you want to delete this file?')) return;
     try {
-      await filesAPI.delete(fileId);
-      onRefresh();
+      const tx = deleteFileTransaction(fileId);
+      signAndExecute(
+        { transaction: tx },
+        {
+          onSuccess: () => onRefresh(),
+          onError: (error) => alert('Failed to delete file: ' + error.message)
+        }
+      );
     } catch (error) {
       alert('Failed to delete file');
     }
   };
   const handleDownload = async (file) => {
     try {
-      const response = await filesAPI.download(file._id);
-      const walrusUrl = response.data.url;
-      const filename = response.data.filename;
-      console.log('🔗 Downloading from Walrus:', walrusUrl);
+      const walrusUrl = getWalrusUrl(file.blobId);
       const link = document.createElement('a');
       link.href = walrusUrl;
-      link.setAttribute('download', filename);
+      link.setAttribute('download', file.name);
       link.setAttribute('target', '_blank');
       document.body.appendChild(link);
       link.click();
@@ -41,8 +48,14 @@ function FileGrid({ files, folders, onRefresh, onFolderOpen }) {
   };
   const handleTogglePublic = async (file) => {
     try {
-      await filesAPI.update(file._id, { isPublic: !file.isPublic });
-      onRefresh();
+      const tx = toggleFilePublicTransaction(file.id);
+      signAndExecute(
+        { transaction: tx },
+        {
+          onSuccess: () => onRefresh(),
+          onError: (error) => alert('Failed to update file: ' + error.message)
+        }
+      );
     } catch (error) {
       alert('Failed to update file');
     }

@@ -3,9 +3,19 @@ import { Upload, Grid, List } from 'lucide-react';
 import UploadModal from './UploadModal';
 import FileGrid from './FileGrid';
 import FileList from './FileList';
-function FileManager({ files, folders, currentFolder, loading, onRefresh, onFolderOpen }) {
+import { useUserFiles, useUserFolders } from '../hooks/useSuiData';
+
+function FileManager({ currentFolder, onFolderOpen }) {
   const [showUpload, setShowUpload] = useState(false);
-  const [viewMode, setViewMode] = useState('grid'); 
+  const [viewMode, setViewMode] = useState('grid');
+  const { files, loading: filesLoading, refetch: refetchFiles } = useUserFiles();
+  const { folders, loading: foldersLoading, refetch: refetchFolders } = useUserFolders();
+  const loading = filesLoading || foldersLoading;
+
+  const onRefresh = () => {
+    refetchFiles();
+    refetchFolders();
+  }; 
   return (
     <div className="p-6">
       {}
