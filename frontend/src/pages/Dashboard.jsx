@@ -18,41 +18,19 @@ function Dashboard() {
       navigate('/');
     }
   }, [currentAccount, navigate]);
-  const loadUserData = async () => {
-    try {
-      const { data } = await authAPI.getMe();
-      setUser(data.user);
-    } catch (error) {
-      console.error('Failed to load user:', error);
-    }
-  };
-  const loadFolders = async (parentId = null) => {
-    try {
-      const { data } = await foldersAPI.getAll({ parentId });
-      setFolders(data.folders);
-    } catch (error) {
-      console.error('Failed to load folders:', error);
-    }
-  };
-  const loadFiles = async (folderId = null) => {
-    try {
-      setLoading(true);
-      const { data } = await filesAPI.getAll({ folderId });
-      setFiles(data.files);
-    } catch (error) {
-      console.error('Failed to load files:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-  const handleFolderSelect = (folder) => {
+
+  const handleFolderOpen = (folder) => {
     setCurrentFolder(folder);
   };
-  const handleRefresh = () => {
-    loadFiles(currentFolder?._id);
-    loadFolders(currentFolder?._id);
-    loadUserData();
+
+  const handleFolderBack = () => {
+    setCurrentFolder(null);
   };
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
   return (
     <div className="min-h-screen bg-gray-950 text-white">
       <Header 
