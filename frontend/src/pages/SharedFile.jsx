@@ -1,31 +1,86 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Download, Eye, ArrowLeft, FileText, Image, Video, Music, File as FileIcon } from 'lucide-react';
-import { filesAPI } from '../services/api';
+import { Download, ArrowLeft, FileText, Image, Video, Music, File as FileIcon } from 'lucide-react';
+import { useSuiClient } from '@mysten/dapp-kit';
+import { getWalrusUrl } from '../services/walrus';
+import { PACKAGE_ID, MODULE_NAMES } from '../config/contracts';
 function SharedFile() {
   const { shareLink } = useParams();
   const navigate = useNavigate();
+  const suiClient = useSuiClient();
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  
   useEffect(() => {
     loadSharedFile();
   }, [shareLink]);
+  
   const loadSharedFile = async () => {
+    if (!shareLink) {
+      setError('Invalid share link');
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
-      const { data } = await filesAPI.getShareLink(shareLink);
-      setFile(data.file);
+      
+      // Query for public files with matching share token
+      const objects = await suiClient.getOwnedObjects({
+        filter: {
+          StructType: `${PACKAGE_ID}::${MODULE_NAMES.FILE_METADATA}::FileMetadata`
+        },
+        options: {
+          showContent: true,
+          showType: true,
+        }
+      });
+
+      // Find file with matching share token
+      let foundFile = null;
+      for (const obj of objects.data) {
+        const content = obj.data?.content?.fields;
+        if (content && content.is_public) {
+          // For now, we'll use the file ID as share link since share_token is optional
+          if (obj.data.objectId.includes(shareLink) || shareLink === obj.data.objectId) {
+            foundFile = {
+              id: obj.data.objectId,
+              name: content.name,
+              blobId: content.blob_id,
+              size: parseInt(content.size),
+              mimeType: content.mime_type,
+              isPublic: content.is_public,
+              createdAt: parseInt(content.created_at),
+              owner: content.owner,
+            };
+            break;
+          }
+        }
+      }
+
+      if (foundFile) {
+        setFile(foundFile);
+      } else {
+        setError('File not found or not publicly shared');
+      }
     } catch (error) {
       console.error('Failed to load shared file:', error);
-      setError(error.response?.data?.error || 'File not found');
+      setError('Failed to load file');
     } finally {
       setLoading(false);
     }
   };
   const handleDownload = () => {
-    if (!file || !file.aggregatorUrl) return;
-    window.open(file.aggregatorUrl, '_blank');
+    if (!file || !file.blobId) return;
+    const walrusUrl = getWalrusUrl(file.blobId);
+    const link = document.createElement('a');
+    link.href = walrusUrl;
+    link.setAttribute('download', file.name);
+    link.setAttribute('target', '_blank');
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
   };
   const getFileIcon = (mimeType) => {
     if (!mimeType) return <FileIcon className="w-24 h-24 text-gray-400" />;
@@ -112,11 +167,8 @@ function SharedFile() {
                 <div className="flex flex-wrap gap-4 text-sm text-gray-400">
                   <span>{formatFileSize(file.size)}</span>
                   <span>•</span>
-                  <span>Uploaded {new Date(file.uploadedAt).toLocaleDateString()}</span>
+                  <span>Uploaded {new Date(file.createdAt).toLocaleDateString()}</span>
                 </div>
-                {file.description && (
-                  <p className="mt-4 text-gray-300">{file.description}</p>
-                )}
               </div>
             </div>
           </div>
@@ -125,7 +177,7 @@ function SharedFile() {
             {isImage ? (
               <div className="flex items-center justify-center">
                 <img
-                  src={file.aggregatorUrl}
+                  src={getWalrusUrl(file.blobId)}
                   alt={file.name}
                   className="max-w-full max-h-[600px] object-contain rounded-lg"
                 />
@@ -133,7 +185,7 @@ function SharedFile() {
             ) : isVideo ? (
               <div className="flex items-center justify-center">
                 <video
-                  src={file.aggregatorUrl}
+                  src={getWalrusUrl(file.blobId)}
                   controls
                   className="max-w-full max-h-[600px] rounded-lg"
                 >
@@ -142,7 +194,7 @@ function SharedFile() {
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-12 text-center">
-                <Eye className="w-16 h-16 text-gray-600 mb-4" />
+                <FileIcon className="w-16 h-16 text-gray-600 mb-4" />
                 <p className="text-gray-400 mb-6">Preview not available for this file type</p>
                 <button
                   onClick={handleDownload}

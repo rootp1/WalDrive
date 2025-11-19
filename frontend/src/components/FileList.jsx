@@ -1,10 +1,16 @@
 import { Folder, FileText, Image, Video, Music, File as FileIcon, Download, Trash2, Share2, Eye, Lock, Globe } from 'lucide-react';
 import { useState } from 'react';
 import FilePreviewModal from './FilePreviewModal';
-import { filesAPI } from '../services/api';
+import ShareModal from './ShareModal';
+import { useSignAndExecuteTransaction } from '@mysten/dapp-kit';
+import { deleteFileTransaction, toggleFilePublicTransaction } from '../services/sui';
+import { getWalrusUrl } from '../services/walrus';
 function FileList({ files, folders, onRefresh, onFolderOpen }) {
   const [selectedFile, setSelectedFile] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [fileToShare, setFileToShare] = useState(null);
+  const { mutate: signAndExecute } = useSignAndExecuteTransaction();
   const getFileIcon = (mimeType) => {
     if (!mimeType) return <FileIcon className="w-5 h-5 text-gray-400" />;
     if (mimeType.startsWith('image/')) return <Image className="w-5 h-5 text-blue-500" />;
@@ -43,19 +49,9 @@ function FileList({ files, folders, onRefresh, onFolderOpen }) {
       alert('Failed to delete file');
     }
   };
-  const handleTogglePublic = async (file) => {
-    try {
-      await filesAPI.update(file._id, { isPublic: !file.isPublic });
-      onRefresh();
-    } catch (error) {
-      alert('Failed to update file');
-    }
-  };
-  const copyShareLink = (file) => {
-    if (!file.shareLink) return;
-    const link = `${window.location.origin}/share/${file.shareLink}`;
-    navigator.clipboard.writeText(link);
-    alert('Share link copied to clipboard!');
+  const handleShare = (file) => {
+    setFileToShare(file);
+    setShowShareModal(true);
   };
   const formatFileSize = (bytes) => {
     if (bytes === 0) return '0 B';
@@ -117,7 +113,7 @@ function FileList({ files, folders, onRefresh, onFolderOpen }) {
                 {formatFileSize(file.size)}
               </td>
               <td className="px-6 py-4 text-sm text-gray-400 hidden lg:table-cell">
-                {new Date(file.uploadedAt).toLocaleDateString()}
+                {new Date(file.createdAt).toLocaleDateString()}
               </td>
               <td className="px-6 py-4">
                 {file.isPublic ? (
@@ -152,21 +148,12 @@ function FileList({ files, folders, onRefresh, onFolderOpen }) {
                     <Download className="w-4 h-4" />
                   </button>
                   <button
-                    onClick={() => handleTogglePublic(file)}
+                    onClick={() => handleShare(file)}
                     className="p-1.5 hover:bg-gray-800 rounded transition-colors"
-                    title={file.isPublic ? 'Make Private' : 'Make Public'}
+                    title="Share"
                   >
-                    {file.isPublic ? <Globe className="w-4 h-4 text-green-500" /> : <Lock className="w-4 h-4" />}
+                    <Share2 className="w-4 h-4" />
                   </button>
-                  {file.isPublic && file.shareLink && (
-                    <button
-                      onClick={() => copyShareLink(file)}
-                      className="p-1.5 hover:bg-gray-800 rounded transition-colors"
-                      title="Copy Share Link"
-                    >
-                      <Share2 className="w-4 h-4" />
-                    </button>
-                  )}
                   <button
                     onClick={() => handleDelete(file.id)}
                     className="p-1.5 hover:bg-red-900/20 hover:text-red-500 rounded transition-colors"
@@ -189,6 +176,21 @@ function FileList({ files, folders, onRefresh, onFolderOpen }) {
             setSelectedFile(null);
           }}
           onRefresh={onRefresh}
+        />
+      )}
+      {}
+      {showShareModal && fileToShare && (
+        <ShareModal
+          file={fileToShare}
+          onClose={() => {
+            setShowShareModal(false);
+            setFileToShare(null);
+          }}
+          onSuccess={() => {
+            setShowShareModal(false);
+            setFileToShare(null);
+            onRefresh();
+          }}
         />
       )}
     </div>

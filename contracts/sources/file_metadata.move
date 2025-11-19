@@ -39,7 +39,7 @@ module waldrive::file_metadata {
     const ENotOwner: u64 = 0;
     const EInvalidBlobId: u64 = 1;
     const EInvalidSize: u64 = 2;
-    public fun create_file(
+    public entry fun create_file(
         name: String,
         blob_id: String,
         size: u64,
@@ -47,7 +47,7 @@ module waldrive::file_metadata {
         folder_id: Option<ID>,
         is_public: bool,
         ctx: &mut TxContext
-    ): FileMetadata {
+    ) {
         let sender = ctx.sender();
         let uid = object::new(ctx);
         let file_id = object::uid_to_inner(&uid);
@@ -69,7 +69,7 @@ module waldrive::file_metadata {
             blob_id: file.blob_id,
             name: file.name,
         });
-        file
+        transfer::public_transfer(file, sender);
     }
     public fun name(file: &FileMetadata): String {
         file.name
@@ -98,7 +98,7 @@ module waldrive::file_metadata {
     public fun share_token(file: &FileMetadata): Option<String> {
         file.share_token
     }
-    public fun update_name(file: &mut FileMetadata, new_name: String, ctx: &TxContext) {
+    public entry fun update_name(file: &mut FileMetadata, new_name: String, ctx: &TxContext) {
         assert!(file.owner == ctx.sender(), ENotOwner);
         file.name = new_name;
         event::emit(FileUpdated {
@@ -106,19 +106,19 @@ module waldrive::file_metadata {
             name: new_name,
         });
     }
-    public fun toggle_public(file: &mut FileMetadata, ctx: &TxContext) {
+    public entry fun toggle_public(file: &mut FileMetadata, ctx: &TxContext) {
         assert!(file.owner == ctx.sender(), ENotOwner);
         file.is_public = !file.is_public;
     }
-    public fun move_to_folder(file: &mut FileMetadata, folder_id: Option<ID>, ctx: &TxContext) {
+    public entry fun move_to_folder(file: &mut FileMetadata, folder_id: Option<ID>, ctx: &TxContext) {
         assert!(file.owner == ctx.sender(), ENotOwner);
         file.folder_id = folder_id;
     }
-    public fun set_share_token(file: &mut FileMetadata, token: String, ctx: &TxContext) {
+    public entry fun set_share_token(file: &mut FileMetadata, token: String, ctx: &TxContext) {
         assert!(file.owner == ctx.sender(), ENotOwner);
         file.share_token = option::some(token);
     }
-    public fun transfer_file(file: FileMetadata, to: address, ctx: &TxContext) {
+    public entry fun transfer_file(file: FileMetadata, to: address, ctx: &TxContext) {
         let from = file.owner;
         event::emit(FileTransferred {
             file_id: object::id(&file),
@@ -127,7 +127,7 @@ module waldrive::file_metadata {
         });
         transfer::public_transfer(file, to);
     }
-    public fun delete_file(file: FileMetadata, ctx: &TxContext) {
+    public entry fun delete_file(file: FileMetadata, ctx: &TxContext) {
         assert!(file.owner == ctx.sender(), ENotOwner);
         let FileMetadata { 
             id,

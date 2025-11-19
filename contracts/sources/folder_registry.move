@@ -34,12 +34,12 @@ module waldrive::folder_registry {
     }
     const ENotOwner: u64 = 0;
     const EInvalidName: u64 = 1;
-    public fun create_folder(
+    public entry fun create_folder(
         name: String,
         parent_id: Option<ID>,
         is_public: bool,
         ctx: &mut TxContext
-    ): Folder {
+    ) {
         let sender = ctx.sender();
         let uid = object::new(ctx);
         let folder_id = object::uid_to_inner(&uid);
@@ -57,7 +57,7 @@ module waldrive::folder_registry {
             name: folder.name,
             parent_id,
         });
-        folder
+        transfer::public_transfer(folder, sender);
     }
     public fun name(folder: &Folder): String {
         folder.name
@@ -74,7 +74,7 @@ module waldrive::folder_registry {
     public fun created_at(folder: &Folder): u64 {
         folder.created_at
     }
-    public fun update_name(folder: &mut Folder, new_name: String, ctx: &TxContext) {
+    public entry fun update_name(folder: &mut Folder, new_name: String, ctx: &TxContext) {
         assert!(folder.owner == ctx.sender(), ENotOwner);
         folder.name = new_name;
         event::emit(FolderUpdated {
@@ -82,11 +82,11 @@ module waldrive::folder_registry {
             name: new_name,
         });
     }
-    public fun toggle_public(folder: &mut Folder, ctx: &TxContext) {
+    public entry fun toggle_public(folder: &mut Folder, ctx: &TxContext) {
         assert!(folder.owner == ctx.sender(), ENotOwner);
         folder.is_public = !folder.is_public;
     }
-    public fun move_to_parent(
+    public entry fun move_to_parent(
         folder: &mut Folder, 
         new_parent_id: Option<ID>, 
         ctx: &TxContext
@@ -100,11 +100,11 @@ module waldrive::folder_registry {
             new_parent: new_parent_id,
         });
     }
-    public fun transfer_folder(folder: Folder, new_owner: address, ctx: &TxContext) {
+    public entry fun transfer_folder(folder: Folder, new_owner: address, ctx: &TxContext) {
         assert!(folder.owner == ctx.sender(), ENotOwner);
         transfer::public_transfer(folder, new_owner);
     }
-    public fun delete_folder(folder: Folder, ctx: &TxContext) {
+    public entry fun delete_folder(folder: Folder, ctx: &TxContext) {
         assert!(folder.owner == ctx.sender(), ENotOwner);
         let Folder { id, owner, .. } = folder;
         event::emit(FolderDeleted {

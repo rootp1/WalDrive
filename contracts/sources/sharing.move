@@ -44,13 +44,13 @@ module waldrive::sharing {
     }
     const ENotOwner: u64 = 0;
     const EExpiredLink: u64 = 1;
-    public fun create_capability(
+    public entry fun create_capability(
         file_id: ID,
         shared_with: address,
         can_write: bool,
         can_delete: bool,
         ctx: &mut TxContext
-    ): ShareCapability {
+    ) {
         let sender = ctx.sender();
         let uid = object::new(ctx);
         let capability_id = object::uid_to_inner(&uid);
@@ -69,15 +69,15 @@ module waldrive::sharing {
             shared_by: sender,
             shared_with,
         });
-        capability
+        transfer::public_transfer(capability, shared_with);
     }
-    public fun create_public_link(
+    public entry fun create_public_link(
         file_id: ID,
         share_token: String,
         can_download: bool,
         expires_at: Option<u64>,
         ctx: &mut TxContext
-    ): PublicShareLink {
+    ) {
         let sender = ctx.sender();
         let uid = object::new(ctx);
         let link_id = object::uid_to_inner(&uid);
@@ -95,7 +95,7 @@ module waldrive::sharing {
             file_id,
             share_token,
         });
-        link
+        transfer::public_transfer(link, sender);
     }
     public fun file_id(cap: &ShareCapability): ID {
         cap.file_id
@@ -132,7 +132,7 @@ module waldrive::sharing {
             false
         }
     }
-    public fun revoke_capability(cap: ShareCapability, ctx: &TxContext) {
+    public entry fun revoke_capability(cap: ShareCapability, ctx: &TxContext) {
         assert!(cap.shared_by == ctx.sender(), ENotOwner);
         let ShareCapability { id, file_id, .. } = cap;
         event::emit(CapabilityRevoked {
@@ -141,7 +141,7 @@ module waldrive::sharing {
         });
         object::delete(id);
     }
-    public fun revoke_public_link(link: PublicShareLink, ctx: &TxContext) {
+    public entry fun revoke_public_link(link: PublicShareLink, ctx: &TxContext) {
         assert!(link.owner == ctx.sender(), ENotOwner);
         let PublicShareLink { id, file_id, .. } = link;
         event::emit(PublicLinkRevoked {
@@ -150,7 +150,7 @@ module waldrive::sharing {
         });
         object::delete(id);
     }
-    public fun transfer_capability(cap: ShareCapability, new_recipient: address) {
+    public entry fun transfer_capability(cap: ShareCapability, new_recipient: address) {
         transfer::public_transfer(cap, new_recipient);
     }
 }

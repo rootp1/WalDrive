@@ -41,7 +41,7 @@ module waldrive::user_profile {
     const ENotOwner: u64 = 0;
     const EFileAlreadyExists: u64 = 1;
     const EFolderAlreadyExists: u64 = 2;
-    public fun create_profile(ctx: &mut TxContext): UserProfile {
+    public entry fun create_profile(ctx: &mut TxContext) {
         let sender = ctx.sender();
         let uid = object::new(ctx);
         let profile_id = object::uid_to_inner(&uid);
@@ -57,7 +57,7 @@ module waldrive::user_profile {
             profile_id,
             wallet_address: sender,
         });
-        profile
+        transfer::transfer(profile, sender);
     }
     public fun wallet_address(profile: &UserProfile): address {
         profile.wallet_address
@@ -77,7 +77,7 @@ module waldrive::user_profile {
     public fun has_folder(profile: &UserProfile, folder_id: ID): bool {
         vec_set::contains(&profile.folder_ids, &folder_id)
     }
-    public fun add_file(profile: &mut UserProfile, file_id: ID, file_size: u64, ctx: &TxContext) {
+    public entry fun add_file(profile: &mut UserProfile, file_id: ID, file_size: u64, ctx: &TxContext) {
         assert!(profile.wallet_address == ctx.sender(), ENotOwner);
         assert!(!vec_set::contains(&profile.file_ids, &file_id), EFileAlreadyExists);
         vec_set::insert(&mut profile.file_ids, file_id);
@@ -87,7 +87,7 @@ module waldrive::user_profile {
             file_id,
         });
     }
-    public fun remove_file(profile: &mut UserProfile, file_id: ID, file_size: u64, ctx: &TxContext) {
+    public entry fun remove_file(profile: &mut UserProfile, file_id: ID, file_size: u64, ctx: &TxContext) {
         assert!(profile.wallet_address == ctx.sender(), ENotOwner);
         vec_set::remove(&mut profile.file_ids, &file_id);
         profile.storage_used = profile.storage_used - file_size;
@@ -96,7 +96,7 @@ module waldrive::user_profile {
             file_id,
         });
     }
-    public fun add_folder(profile: &mut UserProfile, folder_id: ID, ctx: &TxContext) {
+    public entry fun add_folder(profile: &mut UserProfile, folder_id: ID, ctx: &TxContext) {
         assert!(profile.wallet_address == ctx.sender(), ENotOwner);
         assert!(!vec_set::contains(&profile.folder_ids, &folder_id), EFolderAlreadyExists);
         vec_set::insert(&mut profile.folder_ids, folder_id);
@@ -105,7 +105,7 @@ module waldrive::user_profile {
             folder_id,
         });
     }
-    public fun remove_folder(profile: &mut UserProfile, folder_id: ID, ctx: &TxContext) {
+    public entry fun remove_folder(profile: &mut UserProfile, folder_id: ID, ctx: &TxContext) {
         assert!(profile.wallet_address == ctx.sender(), ENotOwner);
         vec_set::remove(&mut profile.folder_ids, &folder_id);
         event::emit(FolderRemoved {
@@ -113,7 +113,7 @@ module waldrive::user_profile {
             folder_id,
         });
     }
-    public fun update_storage(profile: &mut UserProfile, new_storage: u64, ctx: &TxContext) {
+    public entry fun update_storage(profile: &mut UserProfile, new_storage: u64, ctx: &TxContext) {
         assert!(profile.wallet_address == ctx.sender(), ENotOwner);
         let old_storage = profile.storage_used;
         profile.storage_used = new_storage;

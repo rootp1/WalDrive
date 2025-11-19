@@ -119,20 +119,6 @@ function UploadModal({ currentFolder, onClose, onSuccess }) {
             )}
           </div>
           {}
-          <div>
-            <label className="block text-sm font-medium text-gray-400 mb-2">
-              Description (optional)
-            </label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Add a description..."
-              className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:border-primary-600 focus:outline-none resize-none"
-              rows="3"
-              disabled={uploading}
-            />
-          </div>
-          {}
           <div className="flex items-center justify-between p-4 bg-gray-800 rounded-lg">
             <div>
               <p className="font-medium text-white">Make file public</p>

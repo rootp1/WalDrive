@@ -5,9 +5,6 @@ module waldrive::sharing {
     use sui::tx_context::TxContext;
     use sui::transfer;
     use sui::event;
-
-    // ===== Structs =====
-
     public struct ShareCapability has key, store {
         id: UID,
         file_id: ID,
@@ -17,7 +14,6 @@ module waldrive::sharing {
         can_delete: bool,
         created_at: u64,
     }
-
     public struct PublicShareLink has key, store {
         id: UID,
         file_id: ID,
@@ -27,50 +23,37 @@ module waldrive::sharing {
         expires_at: Option<u64>,
         created_at: u64,
     }
-
-    // ===== Events =====
-
     public struct CapabilityCreated has copy, drop {
         capability_id: ID,
         file_id: ID,
         shared_by: address,
         shared_with: address,
     }
-
     public struct CapabilityRevoked has copy, drop {
         capability_id: ID,
         file_id: ID,
     }
-
     public struct PublicLinkCreated has copy, drop {
         link_id: ID,
         file_id: ID,
         share_token: String,
     }
-
     public struct PublicLinkRevoked has copy, drop {
         link_id: ID,
         file_id: ID,
     }
-
-    // ===== Error Codes =====
-
     const ENotOwner: u64 = 0;
     const EExpiredLink: u64 = 1;
-
-    // ===== Public Functions =====
-
-    public fun create_capability(
+    public entry fun create_capability(
         file_id: ID,
         shared_with: address,
         can_write: bool,
         can_delete: bool,
         ctx: &mut TxContext
-    ): ShareCapability {
+    ) {
         let sender = ctx.sender();
         let uid = object::new(ctx);
         let capability_id = object::uid_to_inner(&uid);
-
         let capability = ShareCapability {
             id: uid,
             file_id,
@@ -80,28 +63,24 @@ module waldrive::sharing {
             can_delete,
             created_at: ctx.epoch_timestamp_ms(),
         };
-
         event::emit(CapabilityCreated {
             capability_id,
             file_id,
             shared_by: sender,
             shared_with,
         });
-
-        capability
+        transfer::public_transfer(capability, shared_with);
     }
-
-    public fun create_public_link(
+    public entry fun create_public_link(
         file_id: ID,
         share_token: String,
         can_download: bool,
         expires_at: Option<u64>,
         ctx: &mut TxContext
-    ): PublicShareLink {
+    ) {
         let sender = ctx.sender();
         let uid = object::new(ctx);
         let link_id = object::uid_to_inner(&uid);
-
         let link = PublicShareLink {
             id: uid,
             file_id,
@@ -111,54 +90,40 @@ module waldrive::sharing {
             expires_at,
             created_at: ctx.epoch_timestamp_ms(),
         };
-
         event::emit(PublicLinkCreated {
             link_id,
             file_id,
             share_token,
         });
-
-        link
+        transfer::public_transfer(link, sender);
     }
-
-    // ===== Accessors =====
-
     public fun file_id(cap: &ShareCapability): ID {
         cap.file_id
     }
-
     public fun shared_by(cap: &ShareCapability): address {
         cap.shared_by
     }
-
     public fun shared_with(cap: &ShareCapability): address {
         cap.shared_with
     }
-
     public fun can_write(cap: &ShareCapability): bool {
         cap.can_write
     }
-
     public fun can_delete(cap: &ShareCapability): bool {
         cap.can_delete
     }
-
     public fun link_file_id(link: &PublicShareLink): ID {
         link.file_id
     }
-
     public fun link_owner(link: &PublicShareLink): address {
         link.owner
     }
-
     public fun share_token(link: &PublicShareLink): String {
         link.share_token
     }
-
     public fun can_download(link: &PublicShareLink): bool {
         link.can_download
     }
-
     public fun is_expired(link: &PublicShareLink, current_time: u64): bool {
         if (option::is_some(&link.expires_at)) {
             let expiry = *option::borrow(&link.expires_at);
@@ -167,34 +132,25 @@ module waldrive::sharing {
             false
         }
     }
-
-    // ===== Mutators =====
-
-    public fun revoke_capability(cap: ShareCapability, ctx: &TxContext) {
+    public entry fun revoke_capability(cap: ShareCapability, ctx: &TxContext) {
         assert!(cap.shared_by == ctx.sender(), ENotOwner);
         let ShareCapability { id, file_id, .. } = cap;
-
         event::emit(CapabilityRevoked {
             capability_id: object::uid_to_inner(&id),
             file_id,
         });
-
         object::delete(id);
     }
-
-    public fun revoke_public_link(link: PublicShareLink, ctx: &TxContext) {
+    public entry fun revoke_public_link(link: PublicShareLink, ctx: &TxContext) {
         assert!(link.owner == ctx.sender(), ENotOwner);
         let PublicShareLink { id, file_id, .. } = link;
-
         event::emit(PublicLinkRevoked {
             link_id: object::uid_to_inner(&id),
             file_id,
         });
-
         object::delete(id);
     }
-
-    public fun transfer_capability(cap: ShareCapability, new_recipient: address) {
+    public entry fun transfer_capability(cap: ShareCapability, new_recipient: address) {
         transfer::public_transfer(cap, new_recipient);
     }
 }

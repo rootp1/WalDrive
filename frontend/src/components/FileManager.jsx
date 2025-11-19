@@ -1,12 +1,14 @@
 import { useState } from 'react';
-import { Upload, Grid, List } from 'lucide-react';
+import { Upload, Grid, List, FolderPlus } from 'lucide-react';
 import UploadModal from './UploadModal';
+import FolderModal from './FolderModal';
 import FileGrid from './FileGrid';
 import FileList from './FileList';
 import { useUserFiles, useUserFolders } from '../hooks/useSuiData';
 
 function FileManager({ currentFolder, onFolderOpen }) {
   const [showUpload, setShowUpload] = useState(false);
+  const [showFolderModal, setShowFolderModal] = useState(false);
   const [viewMode, setViewMode] = useState('grid');
   const { files, loading: filesLoading, refetch: refetchFiles } = useUserFiles();
   const { folders, loading: foldersLoading, refetch: refetchFolders } = useUserFolders();
@@ -56,6 +58,13 @@ function FileManager({ currentFolder, onFolderOpen }) {
           </div>
           {}
           <button
+            onClick={() => setShowFolderModal(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg font-medium transition-colors"
+          >
+            <FolderPlus className="w-5 h-5" />
+            <span>New Folder</span>
+          </button>
+          <button
             onClick={() => setShowUpload(true)}
             className="flex items-center gap-2 px-4 py-2 bg-primary-600 hover:bg-primary-700 rounded-lg font-medium transition-colors"
           >
@@ -103,6 +112,17 @@ function FileManager({ currentFolder, onFolderOpen }) {
           onClose={() => setShowUpload(false)}
           onSuccess={() => {
             setShowUpload(false);
+            onRefresh();
+          }}
+        />
+      )}
+      {}
+      {showFolderModal && (
+        <FolderModal
+          currentFolder={currentFolder}
+          onClose={() => setShowFolderModal(false)}
+          onSuccess={() => {
+            setShowFolderModal(false);
             onRefresh();
           }}
         />

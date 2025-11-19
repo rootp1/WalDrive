@@ -1,6 +1,7 @@
 import { Folder, FileText, Image, Video, Music, File as FileIcon, Download, Trash2, Share2, Eye, Lock, Globe } from 'lucide-react';
 import { useState } from 'react';
 import FilePreviewModal from './FilePreviewModal';
+import ShareModal from './ShareModal';
 import { useSignAndExecuteTransaction } from '@mysten/dapp-kit';
 import { deleteFileTransaction, toggleFilePublicTransaction } from '../services/sui';
 import { getWalrusUrl } from '../services/walrus';
@@ -8,6 +9,8 @@ import { getWalrusUrl } from '../services/walrus';
 function FileGrid({ files, folders, onRefresh, onFolderOpen }) {
   const [selectedFile, setSelectedFile] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [fileToShare, setFileToShare] = useState(null);
   const { mutate: signAndExecute } = useSignAndExecuteTransaction();
   const getFileIcon = (mimeType) => {
     if (!mimeType) return <FileIcon className="w-12 h-12" />;
@@ -46,25 +49,9 @@ function FileGrid({ files, folders, onRefresh, onFolderOpen }) {
       alert('Failed to download file');
     }
   };
-  const handleTogglePublic = async (file) => {
-    try {
-      const tx = toggleFilePublicTransaction(file.id);
-      signAndExecute(
-        { transaction: tx },
-        {
-          onSuccess: () => onRefresh(),
-          onError: (error) => alert('Failed to update file: ' + error.message)
-        }
-      );
-    } catch (error) {
-      alert('Failed to update file');
-    }
-  };
-  const copyShareLink = (file) => {
-    if (!file.shareLink) return;
-    const link = `${window.location.origin}/share/${file.shareLink}`;
-    navigator.clipboard.writeText(link);
-    alert('Share link copied to clipboard!');
+  const handleShare = (file) => {
+    setFileToShare(file);
+    setShowShareModal(true);
   };
   return (
     <div>
@@ -88,7 +75,7 @@ function FileGrid({ files, folders, onRefresh, onFolderOpen }) {
         {}
         {files.map((file) => (
           <div
-            key={file._id}
+            key={file.id}
             className="group bg-gray-900 border border-gray-800 rounded-lg overflow-hidden hover:border-primary-600 transition-all"
           >
             {}
@@ -112,7 +99,7 @@ function FileGrid({ files, folders, onRefresh, onFolderOpen }) {
                 )}
               </div>
               <p className="text-xs text-gray-400">
-                {(file.size / 1024).toFixed(1)} KB • {new Date(file.uploadedAt).toLocaleDateString()}
+                {(file.size / 1024).toFixed(1)} KB • {new Date(file.createdAt).toLocaleDateString()}
               </p>
               {}
               <div className="flex items-center gap-2 mt-3">
@@ -134,11 +121,11 @@ function FileGrid({ files, folders, onRefresh, onFolderOpen }) {
                 <Download className="w-4 h-4" />
               </button>
               <button
-                onClick={() => handleTogglePublic(file)}
+                onClick={() => handleShare(file)}
                 className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
-                title={file.isPublic ? 'Make Private' : 'Make Public'}
+                title="Share"
               >
-                {file.isPublic ? <Globe className="w-4 h-4 text-green-500" /> : <Lock className="w-4 h-4" />}
+                <Share2 className="w-4 h-4" />
               </button>
               <button
                 onClick={() => handleDelete(file.id)}
@@ -161,6 +148,21 @@ function FileGrid({ files, folders, onRefresh, onFolderOpen }) {
             setSelectedFile(null);
           }}
           onRefresh={onRefresh}
+        />
+      )}
+      {}
+      {showShareModal && fileToShare && (
+        <ShareModal
+          file={fileToShare}
+          onClose={() => {
+            setShowShareModal(false);
+            setFileToShare(null);
+          }}
+          onSuccess={() => {
+            setShowShareModal(false);
+            setFileToShare(null);
+            onRefresh();
+          }}
         />
       )}
     </div>
