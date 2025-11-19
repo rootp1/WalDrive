@@ -1,17 +1,17 @@
-import { useState, useEffect } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useCurrentAccount } from '@mysten/dapp-kit';
 import Header from '../components/Header';
 import Sidebar from '../components/Sidebar';
 import FileManager from '../components/FileManager';
 import ActivityLog from '../components/ActivityLog';
-import { filesAPI, foldersAPI, authAPI } from '../services/api';
+
 function Dashboard() {
-  const [user, setUser] = useState(null);
-  const [files, setFiles] = useState([]);
-  const [folders, setFolders] = useState([]);
+  const currentAccount = useCurrentAccount();
+  const navigate = useNavigate();
   const [currentFolder, setCurrentFolder] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [view, setView] = useState('files');
   useEffect(() => {
     loadUserData();
     loadFolders();
@@ -62,37 +62,27 @@ function Dashboard() {
     loadUserData();
   };
   return (
-    <div className="flex flex-col h-screen bg-black">
-      <Header
-        user={user}
-        onRefresh={handleRefresh}
-        toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+    <div className="min-h-screen bg-gray-950 text-white">
+      <Header 
+        toggleSidebar={toggleSidebar}
       />
-      <div className="flex flex-1 overflow-hidden">
-        <Sidebar
+      <div className="flex">
+        <Sidebar 
           isOpen={sidebarOpen}
-          folders={folders}
           currentFolder={currentFolder}
-          onFolderSelect={handleFolderSelect}
-          onRefresh={loadFolders}
+          onFolderBack={handleFolderBack}
+          view={view}
+          setView={setView}
         />
-        <main className="flex-1 overflow-auto custom-scrollbar">
-          <Routes>
-            <Route
-              path="/"
-              element={
-                <FileManager
-                  files={files}
-                  folders={folders}
-                  currentFolder={currentFolder}
-                  loading={loading}
-                  onRefresh={handleRefresh}
-                  onFolderOpen={handleFolderSelect}
-                />
-              }
+        <main className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-0'}`}>
+          {view === 'files' ? (
+            <FileManager
+              currentFolder={currentFolder}
+              onFolderOpen={handleFolderOpen}
             />
-            <Route path="/activity" element={<ActivityLog />} />
-          </Routes>
+          ) : (
+            <ActivityLog />
+          )}
         </main>
       </div>
     </div>

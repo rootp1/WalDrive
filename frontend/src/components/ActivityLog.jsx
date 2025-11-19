@@ -1,16 +1,8 @@
-import { useState, useEffect } from 'react';
-import { Upload, Download, Trash2, Share2, FolderPlus, Eye, Edit, ArrowLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { activityAPI } from '../services/api';
-import { Clock, Upload, Download, Trash2, FolderPlus, Edit } from 'lucide-react';
+import { Clock } from 'lucide-react';
 
 function ActivityLog() {
   const loading = false;
   const activities = [];
-  const [activities, setActivities] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [stats, setStats] = useState(null);
-  const navigate = useNavigate();
   useEffect(() => {
     loadActivities();
     loadStats();
@@ -83,22 +75,8 @@ function ActivityLog() {
     return date.toLocaleDateString();
   };
   return (
-    <div className="p-6">
-      {}
-      <div className="flex items-center gap-4 mb-6">
-        <button
-          onClick={() => navigate('/drive')}
-          className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <div>
-          <h2 className="text-2xl font-bold text-white">Activity Log</h2>
-          <p className="text-gray-400 text-sm mt-1">
-            Track all your file operations and activities
-          </p>
-        </div>
-      </div>
+    <div className="p-8">
+      <h1 className="text-3xl font-bold text-white mb-8">Activity Log</h1>
       {}
       {stats && (
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
@@ -124,10 +102,10 @@ function ActivityLog() {
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
         </div>
       ) : activities.length === 0 ? (
-        <div className="flex flex-col items-center justify-center h-64 text-center">
-          <Eye className="w-16 h-16 text-gray-600 mb-4" />
-          <h3 className="text-xl font-semibold text-gray-400 mb-2">No activities yet</h3>
-          <p className="text-gray-500">Your file operations will appear here</p>
+                <div className="p-12 text-center">
+          <Clock className="w-16 h-16 mx-auto mb-4 text-gray-600" />
+          <p className="text-gray-400 mb-2">Activity Log Coming Soon</p>
+          <p className="text-sm text-gray-500">Activity tracking will be available once blockchain event indexing is implemented</p>
         </div>
       ) : (
         <div className="bg-gray-900 border border-gray-800 rounded-lg overflow-hidden">

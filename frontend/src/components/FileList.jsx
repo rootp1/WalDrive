@@ -78,11 +78,11 @@ function FileList({ files, folders, onRefresh, onFolderOpen }) {
         </thead>
         <tbody>
           {}
-                    {folders.map((folder) => (
+                              {folders.map((folder) => (
             <tr
               key={folder.id}
               onClick={() => onFolderOpen(folder)}
-              className="border-b border-gray-800 hover:bg-gray-850 transition-colors cursor-pointer"
+              className="border-b border-gray-800 hover:bg-gray-850 cursor-pointer transition-colors"
             >
               <td className="px-6 py-4">
                 <div className="flex items-center gap-3">
@@ -106,7 +106,7 @@ function FileList({ files, folders, onRefresh, onFolderOpen }) {
           ))}
           {}
           {files.map((file) => (
-            <tr key={file._id} className="border-b border-gray-800 hover:bg-gray-850 transition-colors">
+            <tr key={file.id} className="border-b border-gray-800 hover:bg-gray-850 transition-colors">
               <td className="px-6 py-4">
                 <div className="flex items-center gap-3">
                   {getFileIcon(file.mimeType)}
@@ -168,7 +168,7 @@ function FileList({ files, folders, onRefresh, onFolderOpen }) {
                     </button>
                   )}
                   <button
-                    onClick={() => handleDelete(file._id)}
+                    onClick={() => handleDelete(file.id)}
                     className="p-1.5 hover:bg-red-900/20 hover:text-red-500 rounded transition-colors"
                     title="Delete"
                   >
