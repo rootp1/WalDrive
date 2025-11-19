@@ -135,4 +135,70 @@ module waldrive::file_metadata {
     public fun share_token(file: &FileMetadata): Option<String> {
         file.share_token
     }
+
+    // ===== Mutators =====
+
+    /// Update file name
+    public fun update_name(file: &mut FileMetadata, new_name: String, ctx: &TxContext) {
+        assert!(file.owner == ctx.sender(), ENotOwner);
+        file.name = new_name;
+
+        event::emit(FileUpdated {
+            file_id: object::id(file),
+            name: new_name,
+        });
+    }
+
+    /// Toggle file visibility
+    public fun toggle_public(file: &mut FileMetadata, ctx: &TxContext) {
+        assert!(file.owner == ctx.sender(), ENotOwner);
+        file.is_public = !file.is_public;
+    }
+
+    /// Move file to a folder
+    public fun move_to_folder(file: &mut FileMetadata, folder_id: Option<ID>, ctx: &TxContext) {
+        assert!(file.owner == ctx.sender(), ENotOwner);
+        file.folder_id = folder_id;
+    }
+
+    /// Set share token for public access
+    public fun set_share_token(file: &mut FileMetadata, token: String, ctx: &TxContext) {
+        assert!(file.owner == ctx.sender(), ENotOwner);
+        file.share_token = option::some(token);
+    }
+
+    /// Transfer file ownership
+    public fun transfer_file(file: FileMetadata, to: address, ctx: &TxContext) {
+        let from = file.owner;
+        event::emit(FileTransferred {
+            file_id: object::id(&file),
+            from,
+            to,
+        });
+        transfer::public_transfer(file, to);
+    }
+
+    /// Delete file
+    public fun delete_file(file: FileMetadata, ctx: &TxContext) {
+        assert!(file.owner == ctx.sender(), ENotOwner);
+        let FileMetadata { 
+            id,
+            name: _,
+            blob_id: _,
+            owner,
+            size: _,
+            mime_type: _,
+            folder_id: _,
+            is_public: _,
+            created_at: _,
+            share_token: _,
+        } = file;
+
+        event::emit(FileDeleted {
+            file_id: object::uid_to_inner(&id),
+            owner,
+        });
+
+        object::delete(id);
+    }
 }
