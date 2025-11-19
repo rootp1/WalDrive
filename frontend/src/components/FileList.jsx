@@ -24,19 +24,32 @@ function FileList({ files, folders, onRefresh, onFolderOpen }) {
   };
   const handleDownload = async (file) => {
     try {
-      const response = await filesAPI.download(file._id);
-      const walrusUrl = response.data.url;
-      const filename = response.data.filename;
-      console.log('🔗 Downloading from Walrus:', walrusUrl);
+      const walrusUrl = getWalrusUrl(file.blobId);
       const link = document.createElement('a');
       link.href = walrusUrl;
-      link.setAttribute('download', filename);
+      link.setAttribute('download', file.name);
       link.setAttribute('target', '_blank');
       document.body.appendChild(link);
       link.click();
       link.remove();
     } catch (error) {
       alert('Failed to download file');
+    }
+  };
+
+  const handleDelete = async (fileId) => {
+    if (!confirm('Are you sure you want to delete this file?')) return;
+    try {
+      const tx = deleteFileTransaction(fileId);
+      signAndExecute(
+        { transaction: tx },
+        {
+          onSuccess: () => onRefresh(),
+          onError: (error) => alert('Failed to delete file: ' + error.message)
+        }
+      );
+    } catch (error) {
+      alert('Failed to delete file');
     }
   };
   const handleTogglePublic = async (file) => {
