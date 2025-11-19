@@ -3,7 +3,7 @@ name = "waldrive_contracts"
 edition = "2024.beta"
 
 [dependencies]
-Walrus = { git = "https://github.com/MystenLabs/walrus.git", subdir = "contracts/walrus", rev = "testnet" }
+Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework/packages/sui-framework", rev = "testnet" }
 
 [addresses]
 sui = "0x2"

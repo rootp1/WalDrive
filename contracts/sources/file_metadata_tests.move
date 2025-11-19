@@ -4,6 +4,7 @@ module waldrive::file_metadata_tests {
     use std::string;
     use std::option;
     use sui::test_scenario;
+    use sui::transfer;
 
     #[test]
     fun test_create_file() {

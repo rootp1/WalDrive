@@ -50,6 +50,20 @@ router.post('/upload', requireAuth, upload.single('file'), async (req, res) => {
     // Upload to Walrus
     const walrusId = await uploadToWalrus(uploadedFilePath);
 
+    // Check if this blob already exists for this user
+    const existingFile = await File.findOne({ walrusId, owner: req.user.walletAddress });
+    
+    if (existingFile) {
+      // Clean up temporary upload file
+      if (uploadedFilePath) {
+        await fs.unlink(uploadedFilePath).catch(() => {});
+      }
+      return res.status(409).json({ 
+        error: 'This file has already been uploaded',
+        existingFile: existingFile 
+      });
+    }
+
     // Create file record
     const fileRecord = new File({
       name: req.file.originalname,
