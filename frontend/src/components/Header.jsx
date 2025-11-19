@@ -8,6 +8,7 @@ function Header({ toggleSidebar }) {
     if (!address) return '';
     return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
   };
+
   return (
     <header className="bg-gray-900 border-b border-gray-800 px-4 py-3">
       <div className="flex items-center justify-between">
@@ -23,44 +24,19 @@ function Header({ toggleSidebar }) {
           </h1>
         </div>
         <div className="flex items-center gap-4">
-          {user && (
+          {currentAccount && (
             <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-gray-800 rounded-lg text-sm">
-              <span className="text-gray-400">Storage:</span>
+              <span className="text-gray-400">Wallet:</span>
               <span className="text-white font-medium">
-                {formatStorage(user.storageUsed)} / {formatStorage(user.storageLimit)}
+                {formatAddress(currentAccount.address)}
               </span>
             </div>
           )}
-          <button
-            onClick={() => navigate('/drive/activity')}
-            className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
-            title="Activity Log"
-          >
-            <Activity className="w-5 h-5" />
-          </button>
-          <button
-            onClick={onRefresh}
-            className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
-            title="Refresh"
-          >
-            <RefreshCw className="w-5 h-5" />
-          </button>
-          <div className="flex items-center gap-2 px-4 py-2 bg-gray-800 rounded-lg">
-            <User className="w-4 h-4 text-gray-400" />
-            <span className="text-sm font-medium">
-              {formatAddress(currentAccount?.address)}
-            </span>
-          </div>
-          <button
-            onClick={() => disconnect()}
-            className="p-2 hover:bg-red-900/20 hover:text-red-500 rounded-lg transition-colors"
-            title="Disconnect"
-          >
-            <LogOut className="w-5 h-5" />
-          </button>
+          <ConnectButton />
         </div>
       </div>
     </header>
   );
 }
+
 export default Header;
