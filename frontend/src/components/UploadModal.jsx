@@ -1,42 +1,59 @@
 import { useState, useRef } from 'react';
 import { X, Upload, File, Check } from 'lucide-react';
-import { filesAPI } from '../services/api';
+import { useSignAndExecuteTransaction, useSuiClient } from '@mysten/dapp-kit';
+import { uploadToWalrus } from '../services/walrus';
+import { createFileTransaction } from '../services/sui';
+
 function UploadModal({ currentFolder, onClose, onSuccess }) {
   const [file, setFile] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [isPublic, setIsPublic] = useState(false);
-  const [description, setDescription] = useState('');
   const fileInputRef = useRef(null);
+  const { mutate: signAndExecute } = useSignAndExecuteTransaction();
+  const suiClient = useSuiClient();
+
   const handleFileSelect = (e) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
       setFile(selectedFile);
     }
   };
+
   const handleUpload = async () => {
     if (!file) return;
     setUploading(true);
     setProgress(0);
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('isPublic', isPublic);
-      formData.append('description', description);
-      if (currentFolder) {
-        formData.append('folderId', currentFolder._id);
-      }
-      await filesAPI.upload(formData, (progressEvent) => {
-        const percentCompleted = Math.round(
-          (progressEvent.loaded * 100) / progressEvent.total
-        );
-        setProgress(percentCompleted);
-      });
-      onSuccess();
+      setProgress(30);
+      const blobId = await uploadToWalrus(file);
+      
+      setProgress(60);
+      const tx = createFileTransaction(
+        file.name,
+        blobId,
+        file.size,
+        file.type,
+        currentFolder?.id || null,
+        isPublic
+      );
+
+      signAndExecute(
+        { transaction: tx },
+        {
+          onSuccess: () => {
+            setProgress(100);
+            onSuccess();
+          },
+          onError: (error) => {
+            console.error('Transaction failed:', error);
+            alert('Failed to create file on-chain: ' + error.message);
+          }
+        }
+      );
     } catch (error) {
       console.error('Upload failed:', error);
-      alert('Upload failed: ' + (error.response?.data?.error || error.message));
-    } finally {
+      alert('Upload failed: ' + error.message);
       setUploading(false);
     }
   };
