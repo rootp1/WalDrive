@@ -1,5 +1,5 @@
 export const NETWORK = 'testnet';
-export const PACKAGE_ID = '0x3952b085766fe6d11af5e988e04886ff0627ef7d2378a88dd783ef58d15cae7d';
+export const PACKAGE_ID = '0x694329d0536a5be66ed32f61cadee2bf70eca09ebdf28191c6cc3fd726f7f397';
 export const MODULE_NAMES = {
   FILE_METADATA: 'file_metadata',
   FOLDER_REGISTRY: 'folder_registry',
