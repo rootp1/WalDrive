@@ -7,7 +7,7 @@ export const MODULE_NAMES = {
   SHARING: 'sharing',
 };
 export const WALRUS_CONFIG = {
-  AGGREGATOR_URL: 'https:
-  PUBLISHER_URL: 'https:
+  AGGREGATOR_URL: 'https://aggregator.walrus-testnet.walrus.space',
+  PUBLISHER_URL: 'https://publisher.walrus-testnet.walrus.space',
   EPOCHS: 5,
 };
