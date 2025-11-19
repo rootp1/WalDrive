@@ -61,7 +61,7 @@ module waldrive::sharing {
             shared_with,
             can_write,
             can_delete,
-            created_at: ctx.epoch_timestamp_ms(),
+            created_at: ctx.epoch(),
         };
         event::emit(CapabilityCreated {
             capability_id,
@@ -88,7 +88,7 @@ module waldrive::sharing {
             share_token,
             can_download,
             expires_at,
-            created_at: ctx.epoch_timestamp_ms(),
+            created_at: ctx.epoch(),
         };
         event::emit(PublicLinkCreated {
             link_id,

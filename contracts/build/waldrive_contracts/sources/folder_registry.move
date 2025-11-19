@@ -49,7 +49,7 @@ module waldrive::folder_registry {
             owner: sender,
             parent_id,
             is_public,
-            created_at: ctx.epoch_timestamp_ms(),
+            created_at: ctx.epoch(),
         };
         event::emit(FolderCreated {
             folder_id,

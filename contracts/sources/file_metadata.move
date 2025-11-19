@@ -60,7 +60,7 @@ module waldrive::file_metadata {
             mime_type,
             folder_id,
             is_public,
-            created_at: ctx.epoch_timestamp_ms(),
+            created_at: ctx.epoch(),
             share_token: option::none(),
         };
         event::emit(FileCreated {

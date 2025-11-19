@@ -51,7 +51,7 @@ module waldrive::user_profile {
             storage_used: 0,
             file_ids: vec_set::empty(),
             folder_ids: vec_set::empty(),
-            created_at: ctx.epoch_timestamp_ms(),
+            created_at: ctx.epoch(),
         };
         event::emit(ProfileCreated {
             profile_id,
