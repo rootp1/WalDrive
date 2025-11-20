@@ -9,7 +9,6 @@ function UploadModal({ currentFolder, onClose, onSuccess }) {
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [isPublic, setIsPublic] = useState(false);
-  const [uploadSuccess, setUploadSuccess] = useState(false);
   const fileInputRef = useRef(null);
   const { mutate: signAndExecute } = useSignAndExecuteTransaction();
   const suiClient = useSuiClient();
@@ -44,18 +43,8 @@ function UploadModal({ currentFolder, onClose, onSuccess }) {
         {
           onSuccess: () => {
             setProgress(100);
-            setUploadSuccess(true);
-            
-            setTimeout(() => {
-              // Reset state for next upload
-              setFile(null);
-              setUploading(false);
-              setProgress(0);
-              setIsPublic(false);
-              setUploadSuccess(false);
-              // Trigger refresh without closing modal
-              onSuccess();
-            }, 1500);
+            // Close modal and refresh immediately after successful upload
+            onSuccess();
           },
           onError: (error) => {
             console.error('Transaction failed:', error);
@@ -164,25 +153,15 @@ function UploadModal({ currentFolder, onClose, onSuccess }) {
           {uploading && (
             <div>
               <div className="flex items-center justify-between text-sm mb-2">
-                <span className="text-gray-400">
-                  {uploadSuccess ? 'Upload complete!' : 'Uploading to Walrus...'}
-                </span>
+                <span className="text-gray-400">Uploading to Walrus...</span>
                 <span className="text-white font-medium">{progress}%</span>
               </div>
               <div className="w-full bg-gray-800 rounded-full h-2 overflow-hidden">
                 <div
-                  className={`h-full transition-all duration-300 ${
-                    uploadSuccess ? 'bg-green-500' : 'bg-primary-600'
-                  }`}
+                  className="bg-primary-600 h-full transition-all duration-300"
                   style={{ width: `${progress}%` }}
                 />
               </div>
-              {uploadSuccess && (
-                <p className="text-sm text-green-400 mt-2 flex items-center gap-2">
-                  <Check className="w-4 h-4" />
-                  File uploaded successfully! You can upload another file.
-                </p>
-              )}
             </div>
           )}
         </div>
