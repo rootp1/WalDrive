@@ -18,9 +18,12 @@ function FolderModal({ currentFolder, onClose, onSuccess }) {
     setCreating(true);
 
     try {
+      // Build path: currentFolder/foldername or just foldername for root
+      const path = currentFolder ? `${currentFolder.path}/${folderName}` : folderName;
+      
       const tx = createFolderTransaction(
         folderName,
-        currentFolder?.id || null,
+        path,
         isPublic
       );
 

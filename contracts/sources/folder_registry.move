@@ -1,7 +1,6 @@
 module waldrive::folder_registry {
     use std::string::String;
-    use std::option::{Self, Option};
-    use sui::object::{Self, UID, ID};
+    use sui::object::{Self, UID};
     use sui::tx_context::TxContext;
     use sui::transfer;
     use sui::event;
@@ -9,7 +8,7 @@ module waldrive::folder_registry {
         id: UID,
         name: String,
         owner: address,
-        parent_id: Option<ID>,
+        path: String,
         is_public: bool,
         created_at: u64,
     }
@@ -17,7 +16,7 @@ module waldrive::folder_registry {
         folder_id: ID,
         owner: address,
         name: String,
-        parent_id: Option<ID>,
+        path: String,
     }
     public struct FolderUpdated has copy, drop {
         folder_id: ID,
@@ -29,14 +28,14 @@ module waldrive::folder_registry {
     }
     public struct FolderMoved has copy, drop {
         folder_id: ID,
-        old_parent: Option<ID>,
-        new_parent: Option<ID>,
+        old_path: String,
+        new_path: String,
     }
     const ENotOwner: u64 = 0;
     const EInvalidName: u64 = 1;
     public entry fun create_folder(
         name: String,
-        parent_id: Option<ID>,
+        path: String,
         is_public: bool,
         ctx: &mut TxContext
     ) {
@@ -47,7 +46,7 @@ module waldrive::folder_registry {
             id: uid,
             name,
             owner: sender,
-            parent_id,
+            path,
             is_public,
             created_at: ctx.epoch(),
         };
@@ -55,7 +54,7 @@ module waldrive::folder_registry {
             folder_id,
             owner: sender,
             name: folder.name,
-            parent_id,
+            path: folder.path,
         });
         transfer::public_transfer(folder, sender);
     }
@@ -65,8 +64,8 @@ module waldrive::folder_registry {
     public fun owner(folder: &Folder): address {
         folder.owner
     }
-    public fun parent_id(folder: &Folder): Option<ID> {
-        folder.parent_id
+    public fun path(folder: &Folder): String {
+        folder.path
     }
     public fun is_public(folder: &Folder): bool {
         folder.is_public
@@ -86,18 +85,18 @@ module waldrive::folder_registry {
         assert!(folder.owner == ctx.sender(), ENotOwner);
         folder.is_public = !folder.is_public;
     }
-    public entry fun move_to_parent(
+    public entry fun move_folder(
         folder: &mut Folder, 
-        new_parent_id: Option<ID>, 
+        new_path: String, 
         ctx: &TxContext
     ) {
         assert!(folder.owner == ctx.sender(), ENotOwner);
-        let old_parent = folder.parent_id;
-        folder.parent_id = new_parent_id;
+        let old_path = folder.path;
+        folder.path = new_path;
         event::emit(FolderMoved {
             folder_id: object::id(folder),
-            old_parent,
-            new_parent: new_parent_id,
+            old_path,
+            new_path,
         });
     }
     public entry fun transfer_folder(folder: Folder, new_owner: address, ctx: &TxContext) {

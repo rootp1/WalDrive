@@ -29,12 +29,15 @@ function UploadModal({ currentFolder, onClose, onSuccess }) {
       const blobId = await uploadToWalrus(file);
       
       setProgress(60);
+      // Build path: currentFolder/filename or just filename for root
+      const path = currentFolder ? `${currentFolder.path}/${file.name}` : file.name;
+      
       const tx = createFileTransaction(
         file.name,
         blobId,
         file.size,
         file.type,
-        currentFolder?.id || null,
+        path,
         isPublic
       );
 

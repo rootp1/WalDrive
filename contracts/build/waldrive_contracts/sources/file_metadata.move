@@ -1,7 +1,7 @@
 module waldrive::file_metadata {
     use std::string::String;
     use std::option::{Self, Option};
-    use sui::object::{Self, UID, ID};
+    use sui::object::{Self, UID};
     use sui::tx_context::TxContext;
     use sui::transfer;
     use sui::event;
@@ -12,7 +12,7 @@ module waldrive::file_metadata {
         owner: address,
         size: u64,
         mime_type: String,
-        folder_id: Option<ID>,
+        path: String,
         is_public: bool,
         created_at: u64,
         share_token: Option<String>,
@@ -44,7 +44,7 @@ module waldrive::file_metadata {
         blob_id: String,
         size: u64,
         mime_type: String,
-        folder_id: Option<ID>,
+        path: String,
         is_public: bool,
         ctx: &mut TxContext
     ) {
@@ -58,7 +58,7 @@ module waldrive::file_metadata {
             owner: sender,
             size,
             mime_type,
-            folder_id,
+            path,
             is_public,
             created_at: ctx.epoch(),
             share_token: option::none(),
@@ -89,8 +89,8 @@ module waldrive::file_metadata {
     public fun is_public(file: &FileMetadata): bool {
         file.is_public
     }
-    public fun folder_id(file: &FileMetadata): Option<ID> {
-        file.folder_id
+    public fun path(file: &FileMetadata): String {
+        file.path
     }
     public fun created_at(file: &FileMetadata): u64 {
         file.created_at
@@ -110,9 +110,9 @@ module waldrive::file_metadata {
         assert!(file.owner == ctx.sender(), ENotOwner);
         file.is_public = !file.is_public;
     }
-    public entry fun move_to_folder(file: &mut FileMetadata, folder_id: Option<ID>, ctx: &TxContext) {
+    public entry fun move_file(file: &mut FileMetadata, new_path: String, ctx: &TxContext) {
         assert!(file.owner == ctx.sender(), ENotOwner);
-        file.folder_id = folder_id;
+        file.path = new_path;
     }
     public entry fun set_share_token(file: &mut FileMetadata, token: String, ctx: &TxContext) {
         assert!(file.owner == ctx.sender(), ENotOwner);
@@ -136,7 +136,7 @@ module waldrive::file_metadata {
             owner,
             size: _,
             mime_type: _,
-            folder_id: _,
+            path: _,
             is_public: _,
             created_at: _,
             share_token: _,

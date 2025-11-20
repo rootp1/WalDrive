@@ -1,16 +1,8 @@
 import { Transaction } from '@mysten/sui/transactions';
 import { PACKAGE_ID, MODULE_NAMES } from '../config/contracts';
 
-export const createFileTransaction = (name, blobId, size, mimeType, folderId, isPublic) => {
+export const createFileTransaction = (name, blobId, size, mimeType, path, isPublic) => {
   const tx = new Transaction();
-  
-  // For Option<ID>, we need to use proper option encoding
-  let folderIdArg;
-  if (folderId) {
-    folderIdArg = tx.pure.option('address', folderId);
-  } else {
-    folderIdArg = tx.pure.option('address', null);
-  }
   
   tx.moveCall({
     target: `${PACKAGE_ID}::${MODULE_NAMES.FILE_METADATA}::create_file`,
@@ -19,7 +11,7 @@ export const createFileTransaction = (name, blobId, size, mimeType, folderId, is
       tx.pure.string(blobId),
       tx.pure.u64(size),
       tx.pure.string(mimeType),
-      folderIdArg,
+      tx.pure.string(path),
       tx.pure.bool(isPublic),
     ],
   });
@@ -27,22 +19,14 @@ export const createFileTransaction = (name, blobId, size, mimeType, folderId, is
   return tx;
 };
 
-export const createFolderTransaction = (name, parentId, isPublic) => {
+export const createFolderTransaction = (name, path, isPublic) => {
   const tx = new Transaction();
-  
-  // For Option<ID>, we need to use proper option encoding
-  let parentIdArg;
-  if (parentId) {
-    parentIdArg = tx.pure.option('address', parentId);
-  } else {
-    parentIdArg = tx.pure.option('address', null);
-  }
   
   tx.moveCall({
     target: `${PACKAGE_ID}::${MODULE_NAMES.FOLDER_REGISTRY}::create_folder`,
     arguments: [
       tx.pure.string(name),
-      parentIdArg,
+      tx.pure.string(path),
       tx.pure.bool(isPublic),
     ],
   });

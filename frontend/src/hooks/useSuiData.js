@@ -31,12 +31,6 @@ export const useUserFiles = () => {
       const fileData = objects.data.map(obj => {
         const content = obj.data.content.fields;
         
-        // Handle Option<ID> - Sui returns it as vec with 0 or 1 element
-        let folderId = null;
-        if (content.folder_id && Array.isArray(content.folder_id) && content.folder_id.length > 0) {
-          folderId = content.folder_id[0];
-        }
-        
         const fileObj = {
           id: obj.data.objectId,
           name: content.name,
@@ -45,12 +39,12 @@ export const useUserFiles = () => {
           mimeType: content.mime_type,
           isPublic: content.is_public,
           createdAt: parseInt(content.created_at),
-          folderId: folderId,
+          path: content.path,
           shareToken: content.share_token,
           owner: content.owner,
         };
         
-        console.log('📄 File:', fileObj.name, 'folderId:', folderId);
+        console.log('📄 File:', fileObj.name, 'path:', fileObj.path);
         return fileObj;
       });
 
@@ -99,22 +93,16 @@ export const useUserFolders = () => {
       const folderData = objects.data.map(obj => {
         const content = obj.data.content.fields;
         
-        // Handle Option<ID> - Sui returns it as vec with 0 or 1 element
-        let parentId = null;
-        if (content.parent_id && Array.isArray(content.parent_id) && content.parent_id.length > 0) {
-          parentId = content.parent_id[0];
-        }
-        
         const folderObj = {
           id: obj.data.objectId,
           name: content.name,
-          parentId: parentId,
+          path: content.path,
           isPublic: content.is_public,
           createdAt: parseInt(content.created_at),
           owner: content.owner,
         };
         
-        console.log('📁 Folder:', folderObj.name, 'parentId:', parentId);
+        console.log('📁 Folder:', folderObj.name, 'path:', folderObj.path);
         return folderObj;
       });
 
