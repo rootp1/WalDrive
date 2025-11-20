@@ -17,6 +17,7 @@ function FileManager({ currentFolder, onFolderOpen }) {
   // Filter files and folders based on current folder
   const files = allFiles.filter(file => {
     if (currentFolder) {
+      console.log('🔍 Filtering file:', file.name, 'folderId:', file.folderId, 'currentFolder.id:', currentFolder.id, 'match:', file.folderId === currentFolder.id);
       return file.folderId === currentFolder.id;
     }
     return !file.folderId; // Root level files (no folder)
@@ -24,10 +25,13 @@ function FileManager({ currentFolder, onFolderOpen }) {
 
   const folders = allFolders.filter(folder => {
     if (currentFolder) {
+      console.log('🔍 Filtering folder:', folder.name, 'parentId:', folder.parentId, 'currentFolder.id:', currentFolder.id, 'match:', folder.parentId === currentFolder.id);
       return folder.parentId === currentFolder.id;
     }
     return !folder.parentId; // Root level folders (no parent)
   });
+
+  console.log('📊 Current folder:', currentFolder?.name || 'Root', 'Files:', files.length, 'Folders:', folders.length);
 
   const onRefresh = () => {
     refetchFiles();
