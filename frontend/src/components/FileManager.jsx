@@ -10,9 +10,24 @@ function FileManager({ currentFolder, onFolderOpen }) {
   const [showUpload, setShowUpload] = useState(false);
   const [showFolderModal, setShowFolderModal] = useState(false);
   const [viewMode, setViewMode] = useState('grid');
-  const { files, loading: filesLoading, refetch: refetchFiles } = useUserFiles();
-  const { folders, loading: foldersLoading, refetch: refetchFolders } = useUserFolders();
+  const { files: allFiles, loading: filesLoading, refetch: refetchFiles } = useUserFiles();
+  const { folders: allFolders, loading: foldersLoading, refetch: refetchFolders } = useUserFolders();
   const loading = filesLoading || foldersLoading;
+
+  // Filter files and folders based on current folder
+  const files = allFiles.filter(file => {
+    if (currentFolder) {
+      return file.folderId === currentFolder.id;
+    }
+    return !file.folderId; // Root level files (no folder)
+  });
+
+  const folders = allFolders.filter(folder => {
+    if (currentFolder) {
+      return folder.parentId === currentFolder.id;
+    }
+    return !folder.parentId; // Root level folders (no parent)
+  });
 
   const onRefresh = () => {
     refetchFiles();
@@ -20,18 +35,19 @@ function FileManager({ currentFolder, onFolderOpen }) {
   }; 
   return (
     <div className="p-6">
-      {}
+      {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-2xl font-bold text-white">
             {currentFolder ? currentFolder.name : 'My Drive'}
           </h2>
           <p className="text-gray-400 text-sm mt-1">
-            {files.length} files, {folders.length} folders
+            {files.length} files • {folders.length} folders
+            {currentFolder && <span className="text-primary-500"> • In folder</span>}
           </p>
         </div>
         <div className="flex items-center gap-3">
-          {}
+          {/* View Mode Toggle */}
           <div className="flex bg-gray-800 rounded-lg p-1">
             <button
               onClick={() => setViewMode('grid')}
@@ -56,7 +72,7 @@ function FileManager({ currentFolder, onFolderOpen }) {
               <List className="w-4 h-4" />
             </button>
           </div>
-          {}
+          {/* Action Buttons */}
           <button
             onClick={() => setShowFolderModal(true)}
             className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg font-medium transition-colors"
@@ -73,7 +89,7 @@ function FileManager({ currentFolder, onFolderOpen }) {
           </button>
         </div>
       </div>
-      {}
+      {/* Content */}
       {loading ? (
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
@@ -105,7 +121,7 @@ function FileManager({ currentFolder, onFolderOpen }) {
           onFolderOpen={onFolderOpen}
         />
       )}
-      {}
+      {/* Modals */}
       {showUpload && (
         <UploadModal
           currentFolder={currentFolder}
@@ -116,7 +132,7 @@ function FileManager({ currentFolder, onFolderOpen }) {
           }}
         />
       )}
-      {}
+      {/* Folder Modal */}
       {showFolderModal && (
         <FolderModal
           currentFolder={currentFolder}

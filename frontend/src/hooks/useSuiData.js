@@ -38,8 +38,8 @@ export const useUserFiles = () => {
           mimeType: content.mime_type,
           isPublic: content.is_public,
           createdAt: parseInt(content.created_at),
-          folderId: content.folder_id,
-          shareToken: content.share_token,
+          folderId: content.folder_id?.fields?.id || null,
+          shareToken: content.share_token?.fields || null,
           owner: content.owner,
         };
       });
@@ -91,7 +91,7 @@ export const useUserFolders = () => {
         return {
           id: obj.data.objectId,
           name: content.name,
-          parentId: content.parent_id,
+          parentId: content.parent_id?.fields?.id || null,
           isPublic: content.is_public,
           createdAt: parseInt(content.created_at),
           owner: content.owner,
