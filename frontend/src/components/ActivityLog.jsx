@@ -1,31 +1,14 @@
-import { Clock } from 'lucide-react';
+import { Clock, Upload, Download, Trash2, Share2, FolderPlus, Eye, Edit } from 'lucide-react';
+import { useCurrentAccount } from '@mysten/dapp-kit';
 
 function ActivityLog() {
+  const currentAccount = useCurrentAccount();
+  
+  // For now, activity log will be empty since we don't have blockchain events tracking
+  // In future, this would query Sui events emitted by the contracts
   const loading = false;
   const activities = [];
-  useEffect(() => {
-    loadActivities();
-    loadStats();
-  }, []);
-  const loadActivities = async () => {
-    try {
-      setLoading(true);
-      const { data } = await activityAPI.getAll({ limit: 50 });
-      setActivities(data.activities);
-    } catch (error) {
-      console.error('Failed to load activities:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-  const loadStats = async () => {
-    try {
-      const { data } = await activityAPI.getStats({ days: 7 });
-      setStats(data.stats);
-    } catch (error) {
-      console.error('Failed to load stats:', error);
-    }
-  };
+  const stats = null;
   const getActionIcon = (action) => {
     switch (action) {
       case 'upload':
@@ -77,7 +60,7 @@ function ActivityLog() {
   return (
     <div className="p-8">
       <h1 className="text-3xl font-bold text-white mb-8">Activity Log</h1>
-      {}
+      {/* Stats Cards */}
       {stats && (
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
           {stats.byAction.map((stat) => (
@@ -96,13 +79,13 @@ function ActivityLog() {
           ))}
         </div>
       )}
-      {}
+      {/* Activity List */}
       {loading ? (
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
         </div>
       ) : activities.length === 0 ? (
-                <div className="p-12 text-center">
+        <div className="p-12 text-center">
           <Clock className="w-16 h-16 mx-auto mb-4 text-gray-600" />
           <p className="text-gray-400 mb-2">Activity Log Coming Soon</p>
           <p className="text-sm text-gray-500">Activity tracking will be available once blockchain event indexing is implemented</p>

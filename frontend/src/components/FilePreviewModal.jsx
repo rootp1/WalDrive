@@ -1,55 +1,65 @@
 import { X, Download, Share2, Lock, Globe, ExternalLink } from 'lucide-react';
-import { useState, useEffect } from 'react';
-import { filesAPI } from '../services/api';
+import { useState } from 'react';
+import { getWalrusUrl } from '../services/walrus';
+import { toggleFilePublicTransaction } from '../services/sui';
+import { useSignAndExecuteTransaction } from '@mysten/dapp-kit';
+
 function FilePreviewModal({ file, onClose, onRefresh }) {
-  const [previewUrl, setPreviewUrl] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const { mutate: signAndExecute } = useSignAndExecuteTransaction();
+  
+  const previewUrl = file.blobId ? getWalrusUrl(file.blobId) : null;
   const isImage = file.mimeType?.startsWith('image/');
   const isVideo = file.mimeType?.startsWith('video/');
   const isAudio = file.mimeType?.startsWith('audio/');
   const isPDF = file.mimeType?.includes('pdf');
-  useEffect(() => {
-    const loadPreviewUrl = async () => {
-      try {
-        const url = await filesAPI.getPreviewUrl(file._id);
-        setPreviewUrl(url);
-      } catch (error) {
-        console.error('Failed to load preview URL:', error);
-      }
-    };
-    loadPreviewUrl();
-  }, [file._id]);
-  const handleDownload = async () => {
-    try {
-      const response = await filesAPI.download(file._id);
-      const walrusUrl = response.data.url;
-      const filename = response.data.filename;
-      console.log('🔗 Downloading from Walrus:', walrusUrl);
-      const link = document.createElement('a');
-      link.href = walrusUrl;
-      link.setAttribute('download', filename);
-      link.setAttribute('target', '_blank');
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-    } catch (error) {
-      alert('Failed to download file');
+  const handleDownload = () => {
+    if (!file.blobId) {
+      alert('No blob ID available for download');
+      return;
     }
+    
+    const walrusUrl = getWalrusUrl(file.blobId);
+    console.log('🔗 Downloading from Walrus:', walrusUrl);
+    
+    const link = document.createElement('a');
+    link.href = walrusUrl;
+    link.setAttribute('download', file.name);
+    link.setAttribute('target', '_blank');
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
   };
-  const handleTogglePublic = async () => {
-    try {
-      await filesAPI.update(file._id, { isPublic: !file.isPublic });
-      onRefresh();
-      onClose();
-    } catch (error) {
-      alert('Failed to update file');
-    }
+
+  const handleTogglePublic = () => {
+    setLoading(true);
+    const transaction = toggleFilePublicTransaction(file.id);
+    
+    signAndExecute(
+      { transaction },
+      {
+        onSuccess: () => {
+          console.log('✅ File visibility toggled successfully');
+          setTimeout(() => {
+            onRefresh();
+            onClose();
+          }, 1000);
+        },
+        onError: (error) => {
+          console.error('❌ Failed to toggle file visibility:', error);
+          alert('Failed to update file visibility');
+          setLoading(false);
+        },
+      }
+    );
   };
   const copyShareLink = () => {
-    if (!file.shareLink) return;
-    const link = `${window.location.origin}/share/${file.shareLink}`;
+    if (!file.id) return;
+    const link = `${window.location.origin}/share/${file.id}`;
     navigator.clipboard.writeText(link);
     alert('Share link copied to clipboard!');
   };
+
   const formatFileSize = (bytes) => {
     if (bytes === 0) return '0 B';
     const k = 1024;
@@ -57,18 +67,19 @@ function FilePreviewModal({ file, onClose, onRefresh }) {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
   };
+
   return (
     <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4" onClick={onClose}>
       <div
         className="bg-gray-900 rounded-xl max-w-5xl w-full max-h-[90vh] border border-gray-800 flex flex-col animate-slideUp"
         onClick={(e) => e.stopPropagation()}
       >
-        {}
+        {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-800">
           <div className="flex-1 min-w-0">
             <h3 className="text-lg font-semibold text-white truncate">{file.name}</h3>
             <p className="text-sm text-gray-400">
-              {formatFileSize(file.size)} • {new Date(file.uploadedAt).toLocaleDateString()}
+              {formatFileSize(file.size)} • {new Date(file.createdAt).toLocaleDateString()}
             </p>
           </div>
           <div className="flex items-center gap-2 ml-4">
@@ -81,7 +92,8 @@ function FilePreviewModal({ file, onClose, onRefresh }) {
             </button>
             <button
               onClick={handleTogglePublic}
-              className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
+              disabled={loading}
+              className="p-2 hover:bg-gray-800 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               title={file.isPublic ? 'Make Private' : 'Make Public'}
             >
               {file.isPublic ? (
@@ -90,7 +102,7 @@ function FilePreviewModal({ file, onClose, onRefresh }) {
                 <Lock className="w-5 h-5" />
               )}
             </button>
-            {file.isPublic && file.shareLink && (
+            {file.isPublic && (
               <button
                 onClick={copyShareLink}
                 className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
@@ -107,7 +119,7 @@ function FilePreviewModal({ file, onClose, onRefresh }) {
             </button>
           </div>
         </div>
-        {}
+        {/* Content */}
         <div className="flex-1 overflow-auto custom-scrollbar p-4">
           {!previewUrl ? (
             <div className="flex items-center justify-center h-full">
