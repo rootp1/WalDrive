@@ -4,6 +4,7 @@ module waldrive::folder_registry {
     use sui::tx_context::TxContext;
     use sui::transfer;
     use sui::event;
+    use sui::clock::{Self, Clock};
     public struct Folder has key, store {
         id: UID,
         name: String,
@@ -37,6 +38,7 @@ module waldrive::folder_registry {
         name: String,
         path: String,
         is_public: bool,
+        clock: &Clock,
         ctx: &mut TxContext
     ) {
         let sender = ctx.sender();
@@ -48,7 +50,7 @@ module waldrive::folder_registry {
             owner: sender,
             path,
             is_public,
-            created_at: ctx.epoch(),
+            created_at: clock::timestamp_ms(clock),
         };
         event::emit(FolderCreated {
             folder_id,

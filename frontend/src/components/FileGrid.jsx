@@ -15,32 +15,32 @@ function FileGrid({ files, folders, onRefresh, onFolderOpen }) {
   const getFileIcon = (mimeType) => {
     if (!mimeType) return <FileIcon className="w-12 h-12 text-gray-400" />;
     
-    // Images
+    
     if (mimeType.startsWith('image/')) return <Image className="w-12 h-12 text-blue-500" />;
     
-    // Videos
+    
     if (mimeType.startsWith('video/')) return <Video className="w-12 h-12 text-purple-500" />;
     
-    // Audio
+    
     if (mimeType.startsWith('audio/')) return <Music className="w-12 h-12 text-green-500" />;
     
-    // Documents
+    
     if (mimeType.includes('pdf')) return <FileText className="w-12 h-12 text-red-500" />;
     if (mimeType.includes('word') || mimeType.includes('document')) return <FileText className="w-12 h-12 text-blue-600" />;
     
-    // Spreadsheets
+    
     if (mimeType.includes('sheet') || mimeType.includes('excel')) return <FileSpreadsheet className="w-12 h-12 text-green-600" />;
     
-    // Presentations
+    
     if (mimeType.includes('presentation') || mimeType.includes('powerpoint')) return <Presentation className="w-12 h-12 text-orange-500" />;
     
-    // Code files
+    
     if (mimeType.includes('javascript') || mimeType.includes('typescript') || 
         mimeType.includes('python') || mimeType.includes('java') ||
         mimeType.includes('json') || mimeType.includes('xml') || mimeType.includes('html') ||
         mimeType.includes('css') || mimeType.includes('text/')) return <FileCode className="w-12 h-12 text-yellow-500" />;
     
-    // Archives
+    
     if (mimeType.includes('zip') || mimeType.includes('rar') || 
         mimeType.includes('tar') || mimeType.includes('7z') ||
         mimeType.includes('compressed')) return <FileArchive className="w-12 h-12 text-amber-600" />;
@@ -82,28 +82,28 @@ function FileGrid({ files, folders, onRefresh, onFolderOpen }) {
   };
   return (
     <div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 animate-slideUp">
         {}
-                  {folders.map((folder) => (
-            <div
-              key={folder.id}
-              onClick={() => onFolderOpen(folder)}
-              className="bg-gray-800 rounded-lg p-4 border border-gray-700 hover:border-primary-500 transition-all cursor-pointer group"
-            >
-              <div className="flex items-start justify-between mb-3">
-                <Folder className="w-12 h-12 text-primary-500" />
-              </div>
-              <h3 className="font-medium text-white truncate mb-1">{folder.name}</h3>
-              <div className="flex items-center gap-2 text-xs text-gray-400">
-                <span>Folder</span>
-              </div>
+        {folders.map((folder) => (
+          <div
+            key={folder.id}
+            onClick={() => onFolderOpen(folder)}
+            className="drive-card p-4 cursor-pointer group"
+          >
+            <div className="flex items-start justify-between mb-3">
+              <Folder className="w-10 h-10 text-primary-500 group-hover:text-primary-400 transition-colors" />
             </div>
-          ))}
+            <h3 className="font-medium text-gray-100 truncate mb-1 text-sm">{folder.name}</h3>
+            <div className="flex items-center gap-2 text-xs text-gray-500">
+              <span>Folder</span>
+            </div>
+          </div>
+        ))}
         {}
         {files.map((file) => (
           <div
             key={file.id}
-            className="group bg-gray-900 border border-gray-800 rounded-lg overflow-hidden hover:border-primary-600 transition-all"
+            className="group drive-card overflow-hidden flex flex-col"
           >
             {}
             <div
@@ -111,56 +111,56 @@ function FileGrid({ files, folders, onRefresh, onFolderOpen }) {
                 setSelectedFile(file);
                 setShowPreview(true);
               }}
-              className="p-6 flex items-center justify-center bg-gray-850 border-b border-gray-800 cursor-pointer hover:bg-gray-800 transition-colors"
+              className="p-8 flex items-center justify-center bg-gradient-to-br from-[#1a1a1a] to-[#141414] border-b border-gray-800/50 cursor-pointer group-hover:from-[#202020] group-hover:to-[#181818] transition-all duration-200 h-32"
             >
               {getFileIcon(file.mimeType)}
             </div>
             {}
-            <div className="p-4">
-              <div className="flex items-start justify-between mb-2">
-                <h3 className="font-medium text-white truncate flex-1">{file.name}</h3>
+            <div className="p-3 flex-1 flex flex-col">
+              <div className="flex items-start justify-between mb-1.5">
+                <h3 className="font-normal text-gray-100 truncate flex-1 text-sm leading-tight">{file.name}</h3>
                 {file.isPublic ? (
-                  <Globe className="w-4 h-4 text-green-500 flex-shrink-0 ml-2" />
+                  <Globe className="w-3.5 h-3.5 text-green-500 flex-shrink-0 ml-2 mt-0.5" />
                 ) : (
-                  <Lock className="w-4 h-4 text-gray-400 flex-shrink-0 ml-2" />
+                  <Lock className="w-3.5 h-3.5 text-gray-500 flex-shrink-0 ml-2 mt-0.5" />
                 )}
               </div>
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-gray-500 mb-3">
                 {(file.size / 1024).toFixed(1)} KB • {new Date(file.createdAt).toLocaleDateString()}
               </p>
               {}
-              <div className="flex items-center gap-2 mt-3">
+              <div className="flex items-center gap-1 mt-auto opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                 <button
                   onClick={() => {
                     setSelectedFile(file);
                     setShowPreview(true);
                   }}
-                  className="p-1.5 hover:bg-gray-800 rounded transition-colors"
+                  className="icon-btn p-1.5"
                   title="Preview"
                 >
-                  <Eye className="w-4 h-4" />
+                  <Eye className="w-3.5 h-3.5 text-gray-400" />
                 </button>
-                              <button
-                onClick={() => handleDownload(file)}
-                className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
-                title="Download"
-              >
-                <Download className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => handleShare(file)}
-                className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
-                title="Share"
-              >
-                <Share2 className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => handleDelete(file.id)}
-                className="p-2 hover:bg-gray-700 rounded-lg transition-colors text-red-400"
-                title="Delete"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
+                <button
+                  onClick={() => handleDownload(file)}
+                  className="icon-btn p-1.5"
+                  title="Download"
+                >
+                  <Download className="w-3.5 h-3.5 text-gray-400" />
+                </button>
+                <button
+                  onClick={() => handleShare(file)}
+                  className="icon-btn p-1.5"
+                  title="Share"
+                >
+                  <Share2 className="w-3.5 h-3.5 text-gray-400" />
+                </button>
+                <button
+                  onClick={() => handleDelete(file.id)}
+                  className="icon-btn p-1.5"
+                  title="Delete"
+                >
+                  <Trash2 className="w-3.5 h-3.5 text-red-400" />
+                </button>
               </div>
             </div>
           </div>

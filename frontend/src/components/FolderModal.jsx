@@ -18,7 +18,7 @@ function FolderModal({ currentFolder, onClose, onSuccess }) {
     setCreating(true);
 
     try {
-      // Build path: currentFolder/foldername or just foldername for root
+      
       const path = currentFolder ? `${currentFolder.path}/${folderName}` : folderName;
       
       const tx = createFolderTransaction(
@@ -51,7 +51,7 @@ function FolderModal({ currentFolder, onClose, onSuccess }) {
   return (
     <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
       <div className="bg-gray-900 rounded-xl max-w-md w-full border border-gray-800 animate-slideUp">
-        {/* Header */}
+        {}
         <div className="flex items-center justify-between p-6 border-b border-gray-800">
           <h3 className="text-xl font-bold text-white">Create New Folder</h3>
           <button
@@ -63,16 +63,16 @@ function FolderModal({ currentFolder, onClose, onSuccess }) {
           </button>
         </div>
 
-        {/* Content */}
+        {}
         <div className="p-6 space-y-4">
-          {/* Folder Icon */}
+          {}
           <div className="flex justify-center">
             <div className="p-4 bg-primary-500/10 rounded-full">
               <Folder className="w-12 h-12 text-primary-500" />
             </div>
           </div>
 
-          {/* Folder Name Input */}
+          {}
           <div>
             <label className="block text-sm font-medium text-gray-400 mb-2">
               Folder Name
@@ -93,7 +93,7 @@ function FolderModal({ currentFolder, onClose, onSuccess }) {
             />
           </div>
 
-          {/* Public Toggle */}
+          {}
           <div className="flex items-center justify-between p-4 bg-gray-800 rounded-lg">
             <div>
               <p className="font-medium text-white">Make folder public</p>
@@ -115,7 +115,7 @@ function FolderModal({ currentFolder, onClose, onSuccess }) {
           </div>
         </div>
 
-        {/* Footer */}
+        {}
         <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-800">
           <button
             onClick={onClose}

@@ -5,6 +5,7 @@ module waldrive::file_metadata {
     use sui::tx_context::TxContext;
     use sui::transfer;
     use sui::event;
+    use sui::clock::{Self, Clock};
     public struct FileMetadata has key, store {
         id: UID,
         name: String,
@@ -46,6 +47,7 @@ module waldrive::file_metadata {
         mime_type: String,
         path: String,
         is_public: bool,
+        clock: &Clock,
         ctx: &mut TxContext
     ) {
         let sender = ctx.sender();
@@ -60,7 +62,7 @@ module waldrive::file_metadata {
             mime_type,
             path,
             is_public,
-            created_at: ctx.epoch(),
+            created_at: clock::timestamp_ms(clock),
             share_token: option::none(),
         };
         event::emit(FileCreated {

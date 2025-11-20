@@ -4,8 +4,8 @@ import { useCurrentAccount } from '@mysten/dapp-kit';
 function ActivityLog() {
   const currentAccount = useCurrentAccount();
   
-  // For now, activity log will be empty since we don't have blockchain events tracking
-  // In future, this would query Sui events emitted by the contracts
+  
+  
   const loading = false;
   const activities = [];
   const stats = null;
@@ -60,7 +60,7 @@ function ActivityLog() {
   return (
     <div className="p-8">
       <h1 className="text-3xl font-bold text-white mb-8">Activity Log</h1>
-      {/* Stats Cards */}
+      {}
       {stats && (
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
           {stats.byAction.map((stat) => (
@@ -79,7 +79,7 @@ function ActivityLog() {
           ))}
         </div>
       )}
-      {/* Activity List */}
+      {}
       {loading ? (
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>

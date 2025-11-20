@@ -32,7 +32,7 @@ function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
+    <div className="min-h-screen bg-[#0a0a0a] text-white">
       <Header 
         toggleSidebar={toggleSidebar}
       />
@@ -44,7 +44,7 @@ function Dashboard() {
           view={view}
           setView={setView}
         />
-        <main className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-0'}`}>
+        <main className={`flex-1 transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-0'} pt-[57px] min-h-screen`}>
           {view === 'files' ? (
             <FileManager
               currentFolder={currentFolder}
@@ -58,4 +58,5 @@ function Dashboard() {
     </div>
   );
 }
+
 export default Dashboard;

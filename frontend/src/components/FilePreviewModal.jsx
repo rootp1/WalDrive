@@ -91,7 +91,7 @@ function FilePreviewModal({ file, onClose, onRefresh }) {
         className="bg-gray-900 rounded-xl max-w-5xl w-full max-h-[90vh] border border-gray-800 flex flex-col animate-slideUp"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
+        {}
         <div className="flex items-center justify-between p-4 border-b border-gray-800">
           <div className="flex-1 min-w-0">
             <h3 className="text-lg font-semibold text-white truncate">{file.name}</h3>
@@ -136,7 +136,7 @@ function FilePreviewModal({ file, onClose, onRefresh }) {
             </button>
           </div>
         </div>
-        {/* Content */}
+        {}
         <div className="flex-1 overflow-auto custom-scrollbar p-4">
           {!previewUrl ? (
             <div className="flex items-center justify-center h-full">

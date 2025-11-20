@@ -14,32 +14,32 @@ function FileList({ files, folders, onRefresh, onFolderOpen }) {
   const getFileIcon = (mimeType) => {
     if (!mimeType) return <FileIcon className="w-5 h-5 text-gray-400" />;
     
-    // Images
+    
     if (mimeType.startsWith('image/')) return <Image className="w-5 h-5 text-blue-500" />;
     
-    // Videos
+    
     if (mimeType.startsWith('video/')) return <Video className="w-5 h-5 text-purple-500" />;
     
-    // Audio
+    
     if (mimeType.startsWith('audio/')) return <Music className="w-5 h-5 text-green-500" />;
     
-    // Documents
+    
     if (mimeType.includes('pdf')) return <FileText className="w-5 h-5 text-red-500" />;
     if (mimeType.includes('word') || mimeType.includes('document')) return <FileText className="w-5 h-5 text-blue-600" />;
     
-    // Spreadsheets
+    
     if (mimeType.includes('sheet') || mimeType.includes('excel')) return <FileSpreadsheet className="w-5 h-5 text-green-600" />;
     
-    // Presentations
+    
     if (mimeType.includes('presentation') || mimeType.includes('powerpoint')) return <Presentation className="w-5 h-5 text-orange-500" />;
     
-    // Code files
+    
     if (mimeType.includes('javascript') || mimeType.includes('typescript') || 
         mimeType.includes('python') || mimeType.includes('java') ||
         mimeType.includes('json') || mimeType.includes('xml') || mimeType.includes('html') ||
         mimeType.includes('css') || mimeType.includes('text/')) return <FileCode className="w-5 h-5 text-yellow-500" />;
     
-    // Archives
+    
     if (mimeType.includes('zip') || mimeType.includes('rar') || 
         mimeType.includes('tar') || mimeType.includes('7z') ||
         mimeType.includes('compressed')) return <FileArchive className="w-5 h-5 text-amber-600" />;
@@ -88,105 +88,107 @@ function FileList({ files, folders, onRefresh, onFolderOpen }) {
     return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
   };
   return (
-    <div className="bg-gray-900 rounded-lg border border-gray-800 overflow-hidden">
+    <div className="drive-card overflow-hidden animate-slideUp">
       <table className="w-full">
-        <thead className="bg-gray-850 border-b border-gray-800">
+        <thead className="bg-[#141414] border-b border-gray-800/50">
           <tr>
-            <th className="text-left px-6 py-3 text-sm font-medium text-gray-400">Name</th>
-            <th className="text-left px-6 py-3 text-sm font-medium text-gray-400 hidden md:table-cell">Size</th>
-            <th className="text-left px-6 py-3 text-sm font-medium text-gray-400 hidden lg:table-cell">Modified</th>
-            <th className="text-left px-6 py-3 text-sm font-medium text-gray-400">Visibility</th>
-            <th className="text-right px-6 py-3 text-sm font-medium text-gray-400">Actions</th>
+            <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+            <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Size</th>
+            <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">Modified</th>
+            <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Visibility</th>
+            <th className="text-right px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
           </tr>
         </thead>
         <tbody>
           {}
-                              {folders.map((folder) => (
+          {folders.map((folder) => (
             <tr
               key={folder.id}
               onClick={() => onFolderOpen(folder)}
-              className="border-b border-gray-800 hover:bg-gray-850 cursor-pointer transition-colors"
+              className="border-b border-gray-800/50 hover:bg-[#202020] cursor-pointer transition-colors group"
             >
               <td className="px-6 py-4">
                 <div className="flex items-center gap-3">
-                  <Folder className="w-5 h-5 text-primary-500 flex-shrink-0" />
-                  <span className="font-medium">{folder.name}</span>
+                  <Folder className="w-5 h-5 text-primary-500 flex-shrink-0 group-hover:text-primary-400 transition-colors" />
+                  <span className="font-normal text-sm text-gray-200">{folder.name}</span>
                 </div>
               </td>
-              <td className="px-6 py-4 text-gray-400 text-sm hidden md:table-cell">-</td>
-              <td className="px-6 py-4 text-gray-400 text-sm hidden lg:table-cell">
+              <td className="px-6 py-4 text-gray-500 text-sm hidden md:table-cell">-</td>
+              <td className="px-6 py-4 text-gray-500 text-sm hidden lg:table-cell">
                 {new Date(folder.createdAt).toLocaleDateString()}
               </td>
               <td className="px-6 py-4">
                 {folder.isPublic ? (
                   <Globe className="w-4 h-4 text-green-500" />
                 ) : (
-                  <Lock className="w-4 h-4 text-gray-400" />
+                  <Lock className="w-4 h-4 text-gray-500" />
                 )}
               </td>
-              <td className="px-6 py-4 text-right">-</td>
+              <td className="px-6 py-4 text-right">
+                <span className="text-gray-600 text-sm">-</span>
+              </td>
             </tr>
           ))}
           {}
           {files.map((file) => (
-            <tr key={file.id} className="border-b border-gray-800 hover:bg-gray-850 transition-colors">
+            <tr key={file.id} className="border-b border-gray-800/50 hover:bg-[#202020] transition-colors group">
               <td className="px-6 py-4">
                 <div className="flex items-center gap-3">
                   {getFileIcon(file.mimeType)}
-                  <span className="text-white truncate">{file.name}</span>
+                  <span className="text-gray-200 truncate text-sm font-normal">{file.name}</span>
                 </div>
               </td>
-              <td className="px-6 py-4 text-sm text-gray-400 hidden md:table-cell">
+              <td className="px-6 py-4 text-sm text-gray-500 hidden md:table-cell">
                 {formatFileSize(file.size)}
               </td>
-              <td className="px-6 py-4 text-sm text-gray-400 hidden lg:table-cell">
+              <td className="px-6 py-4 text-sm text-gray-500 hidden lg:table-cell">
                 {new Date(file.createdAt).toLocaleDateString()}
               </td>
               <td className="px-6 py-4">
                 {file.isPublic ? (
-                  <span className="inline-flex items-center gap-1 text-sm text-green-500">
-                    <Globe className="w-4 h-4" />
-                    Public
+                  <span className="inline-flex items-center gap-1.5 text-xs text-green-500">
+                    <Globe className="w-3.5 h-3.5" />
+                    <span className="hidden lg:inline">Public</span>
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1 text-sm text-gray-400">
-                    <Lock className="w-4 h-4" />
-                    Private
+                  <span className="inline-flex items-center gap-1.5 text-xs text-gray-500">
+                    <Lock className="w-3.5 h-3.5" />
+                    <span className="hidden lg:inline">Private</span>
                   </span>
                 )}
               </td>
               <td className="px-6 py-4">
-                <div className="flex items-center justify-end gap-2">
+                <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                   <button
                     onClick={() => {
                       setSelectedFile(file);
                       setShowPreview(true);
                     }}
-                    className="p-1.5 hover:bg-gray-800 rounded transition-colors"
+                    className="icon-btn p-1.5"
                     title="Preview"
                   >
-                    <Eye className="w-4 h-4" />
+                    <Eye className="w-4 h-4 text-gray-400" />
                   </button>
                   <button
                     onClick={() => handleDownload(file)}
-                    className="p-1.5 hover:bg-gray-800 rounded transition-colors"
+                    className="icon-btn p-1.5"
                     title="Download"
                   >
-                    <Download className="w-4 h-4" />
+                    <Download className="w-4 h-4 text-gray-400" />
                   </button>
                   <button
                     onClick={() => handleShare(file)}
-                    className="p-1.5 hover:bg-gray-800 rounded transition-colors"
+                    className="icon-btn p-1.5"
                     title="Share"
                   >
-                    <Share2 className="w-4 h-4" />
+                    <Share2 className="w-4 h-4 text-gray-400" />
                   </button>
                   <button
                     onClick={() => handleDelete(file.id)}
-                    className="p-1.5 hover:bg-red-900/20 hover:text-red-500 rounded transition-colors"
+                    className="icon-btn p-1.5 hover:bg-red-900/20"
                     title="Delete"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-4 h-4 text-red-400" />
                   </button>
                 </div>
               </td>

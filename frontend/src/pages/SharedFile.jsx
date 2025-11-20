@@ -26,7 +26,7 @@ function SharedFile() {
     try {
       setLoading(true);
       
-      // Query for public files with matching share token
+      
       const objects = await suiClient.getOwnedObjects({
         filter: {
           StructType: `${PACKAGE_ID}::${MODULE_NAMES.FILE_METADATA}::FileMetadata`
@@ -37,12 +37,12 @@ function SharedFile() {
         }
       });
 
-      // Find file with matching share token
+      
       let foundFile = null;
       for (const obj of objects.data) {
         const content = obj.data?.content?.fields;
         if (content && content.is_public) {
-          // For now, we'll use the file ID as share link since share_token is optional
+          
           if (obj.data.objectId.includes(shareLink) || shareLink === obj.data.objectId) {
             foundFile = {
               id: obj.data.objectId,

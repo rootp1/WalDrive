@@ -5,6 +5,7 @@ module waldrive::file_metadata_tests {
     use std::option;
     use sui::test_scenario;
     use sui::transfer;
+    use sui::clock::{Self, Clock};
     #[test]
     fun test_create_file() {
         let user = @0xA;

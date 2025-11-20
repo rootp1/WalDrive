@@ -13,6 +13,7 @@ export const createFileTransaction = (name, blobId, size, mimeType, path, isPubl
       tx.pure.string(mimeType),
       tx.pure.string(path),
       tx.pure.bool(isPublic),
+      tx.object('0x6'), 
     ],
   });
   
@@ -28,6 +29,7 @@ export const createFolderTransaction = (name, path, isPublic) => {
       tx.pure.string(name),
       tx.pure.string(path),
       tx.pure.bool(isPublic),
+      tx.object('0x6'), 
     ],
   });
   

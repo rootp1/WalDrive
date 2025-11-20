@@ -6,6 +6,10 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Inter', 'Roboto', 'system-ui', 'sans-serif'],
+        display: ['Inter', 'sans-serif'],
+      },
       colors: {
         primary: {
           50: '#eef2ff',
@@ -19,6 +23,12 @@ export default {
           800: '#3730a3',
           900: '#312e81',
         },
+      },
+      fontSize: {
+        'xxs': '0.625rem',
+      },
+      spacing: {
+        '18': '4.5rem',
       },
     },
   },
