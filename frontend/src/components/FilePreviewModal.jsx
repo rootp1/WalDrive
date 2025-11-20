@@ -72,7 +72,8 @@ function FilePreviewModal({ file, onClose, onRefresh }) {
   };
   const copyShareLink = () => {
     if (!file.id) return;
-    const link = `${window.location.origin}/share/${file.id}`;
+    const appUrl = import.meta.env.VITE_APP_URL || window.location.origin;
+    const link = `${appUrl}/share/${file.id}`;
     navigator.clipboard.writeText(link);
     alert('Share link copied to clipboard!');
   };

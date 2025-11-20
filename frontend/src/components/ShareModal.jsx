@@ -12,8 +12,10 @@ function ShareModal({ file, onClose, onSuccess }) {
   const [newAddress, setNewAddress] = useState('');
   const [sharing, setSharing] = useState(false);
 
+  // Use environment variable for production URL, fallback to current origin
+  const appUrl = import.meta.env.VITE_APP_URL || window.location.origin;
   const shareUrl = file.isPublic 
-    ? `${window.location.origin}/share/${file.id}`
+    ? `${appUrl}/share/${file.id}`
     : null;
 
   const handleCopyLink = () => {
