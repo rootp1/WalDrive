@@ -9,6 +9,7 @@ function UploadModal({ currentFolder, onClose, onSuccess }) {
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [isPublic, setIsPublic] = useState(false);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
   const fileInputRef = useRef(null);
   const { mutate: signAndExecute } = useSignAndExecuteTransaction();
   const suiClient = useSuiClient();
@@ -43,11 +44,31 @@ function UploadModal({ currentFolder, onClose, onSuccess }) {
         {
           onSuccess: () => {
             setProgress(100);
-            onSuccess();
+            setUploadSuccess(true);
+            
+            setTimeout(() => {
+              // Reset state for next upload
+              setFile(null);
+              setUploading(false);
+              setProgress(0);
+              setIsPublic(false);
+              setUploadSuccess(false);
+              // Trigger refresh without closing modal
+              onSuccess();
+            }, 1500);
           },
           onError: (error) => {
             console.error('Transaction failed:', error);
-            alert('Failed to create file on-chain: ' + error.message);
+            
+            // Check if user cancelled the transaction
+            if (error.message?.includes('rejected') || error.message?.includes('User rejected')) {
+              console.log('Transaction cancelled by user');
+              onClose(); // Auto close on cancellation
+            } else {
+              alert('Failed to create file on-chain: ' + error.message);
+              setUploading(false);
+              setProgress(0);
+            }
           }
         }
       );
@@ -55,6 +76,7 @@ function UploadModal({ currentFolder, onClose, onSuccess }) {
       console.error('Upload failed:', error);
       alert('Upload failed: ' + error.message);
       setUploading(false);
+      setProgress(0);
     }
   };
   const formatFileSize = (bytes) => {
@@ -138,19 +160,29 @@ function UploadModal({ currentFolder, onClose, onSuccess }) {
               />
             </button>
           </div>
-          {}
+          {/* Upload Progress */}
           {uploading && (
             <div>
               <div className="flex items-center justify-between text-sm mb-2">
-                <span className="text-gray-400">Uploading to Walrus...</span>
+                <span className="text-gray-400">
+                  {uploadSuccess ? 'Upload complete!' : 'Uploading to Walrus...'}
+                </span>
                 <span className="text-white font-medium">{progress}%</span>
               </div>
               <div className="w-full bg-gray-800 rounded-full h-2 overflow-hidden">
                 <div
-                  className="bg-primary-600 h-full transition-all duration-300"
+                  className={`h-full transition-all duration-300 ${
+                    uploadSuccess ? 'bg-green-500' : 'bg-primary-600'
+                  }`}
                   style={{ width: `${progress}%` }}
                 />
               </div>
+              {uploadSuccess && (
+                <p className="text-sm text-green-400 mt-2 flex items-center gap-2">
+                  <Check className="w-4 h-4" />
+                  File uploaded successfully! You can upload another file.
+                </p>
+              )}
             </div>
           )}
         </div>

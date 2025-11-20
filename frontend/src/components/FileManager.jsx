@@ -127,7 +127,7 @@ function FileManager({ currentFolder, onFolderOpen }) {
           currentFolder={currentFolder}
           onClose={() => setShowUpload(false)}
           onSuccess={() => {
-            setShowUpload(false);
+            // Only refresh, don't close modal (modal handles its own state)
             onRefresh();
           }}
         />
