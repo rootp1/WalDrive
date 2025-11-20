@@ -4,7 +4,13 @@ import { PACKAGE_ID, MODULE_NAMES } from '../config/contracts';
 export const createFileTransaction = (name, blobId, size, mimeType, folderId, isPublic) => {
   const tx = new Transaction();
   
-  const folderIdArg = folderId ? tx.pure.id(folderId) : tx.pure.option('id', null);
+  // For Option<ID>, we need to use proper option encoding
+  let folderIdArg;
+  if (folderId) {
+    folderIdArg = tx.pure.option('address', folderId);
+  } else {
+    folderIdArg = tx.pure.option('address', null);
+  }
   
   tx.moveCall({
     target: `${PACKAGE_ID}::${MODULE_NAMES.FILE_METADATA}::create_file`,
@@ -24,7 +30,13 @@ export const createFileTransaction = (name, blobId, size, mimeType, folderId, is
 export const createFolderTransaction = (name, parentId, isPublic) => {
   const tx = new Transaction();
   
-  const parentIdArg = parentId ? tx.pure.id(parentId) : tx.pure.option('id', null);
+  // For Option<ID>, we need to use proper option encoding
+  let parentIdArg;
+  if (parentId) {
+    parentIdArg = tx.pure.option('address', parentId);
+  } else {
+    parentIdArg = tx.pure.option('address', null);
+  }
   
   tx.moveCall({
     target: `${PACKAGE_ID}::${MODULE_NAMES.FOLDER_REGISTRY}::create_folder`,
