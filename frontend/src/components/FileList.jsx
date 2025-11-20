@@ -1,4 +1,4 @@
-import { Folder, FileText, Image, Video, Music, File as FileIcon, Download, Trash2, Share2, Eye, Lock, Globe } from 'lucide-react';
+import { Folder, FileText, Image, Video, Music, File as FileIcon, Download, Trash2, Share2, Eye, Lock, Globe, FileCode, FileArchive, FileSpreadsheet, Presentation } from 'lucide-react';
 import { useState } from 'react';
 import FilePreviewModal from './FilePreviewModal';
 import ShareModal from './ShareModal';
@@ -13,10 +13,37 @@ function FileList({ files, folders, onRefresh, onFolderOpen }) {
   const { mutate: signAndExecute } = useSignAndExecuteTransaction();
   const getFileIcon = (mimeType) => {
     if (!mimeType) return <FileIcon className="w-5 h-5 text-gray-400" />;
+    
+    // Images
     if (mimeType.startsWith('image/')) return <Image className="w-5 h-5 text-blue-500" />;
+    
+    // Videos
     if (mimeType.startsWith('video/')) return <Video className="w-5 h-5 text-purple-500" />;
+    
+    // Audio
     if (mimeType.startsWith('audio/')) return <Music className="w-5 h-5 text-green-500" />;
-    if (mimeType.includes('pdf') || mimeType.includes('document')) return <FileText className="w-5 h-5 text-red-500" />;
+    
+    // Documents
+    if (mimeType.includes('pdf')) return <FileText className="w-5 h-5 text-red-500" />;
+    if (mimeType.includes('word') || mimeType.includes('document')) return <FileText className="w-5 h-5 text-blue-600" />;
+    
+    // Spreadsheets
+    if (mimeType.includes('sheet') || mimeType.includes('excel')) return <FileSpreadsheet className="w-5 h-5 text-green-600" />;
+    
+    // Presentations
+    if (mimeType.includes('presentation') || mimeType.includes('powerpoint')) return <Presentation className="w-5 h-5 text-orange-500" />;
+    
+    // Code files
+    if (mimeType.includes('javascript') || mimeType.includes('typescript') || 
+        mimeType.includes('python') || mimeType.includes('java') ||
+        mimeType.includes('json') || mimeType.includes('xml') || mimeType.includes('html') ||
+        mimeType.includes('css') || mimeType.includes('text/')) return <FileCode className="w-5 h-5 text-yellow-500" />;
+    
+    // Archives
+    if (mimeType.includes('zip') || mimeType.includes('rar') || 
+        mimeType.includes('tar') || mimeType.includes('7z') ||
+        mimeType.includes('compressed')) return <FileArchive className="w-5 h-5 text-amber-600" />;
+    
     return <FileIcon className="w-5 h-5 text-gray-400" />;
   };
   const handleDownload = async (file) => {

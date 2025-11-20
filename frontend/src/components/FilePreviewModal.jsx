@@ -1,4 +1,4 @@
-import { X, Download, Share2, Lock, Globe, ExternalLink } from 'lucide-react';
+import { X, Download, Share2, Lock, Globe, ExternalLink, FileText, Image, Video, Music, File as FileIcon, FileCode, FileArchive, FileSpreadsheet, Presentation } from 'lucide-react';
 import { useState } from 'react';
 import { getWalrusUrl } from '../services/walrus';
 import { toggleFilePublicTransaction } from '../services/sui';
@@ -7,6 +7,23 @@ import { useSignAndExecuteTransaction } from '@mysten/dapp-kit';
 function FilePreviewModal({ file, onClose, onRefresh }) {
   const [loading, setLoading] = useState(false);
   const { mutate: signAndExecute } = useSignAndExecuteTransaction();
+  
+  const getFileIcon = (mimeType) => {
+    if (!mimeType) return <FileIcon className="w-16 h-16 text-gray-400" />;
+    if (mimeType.startsWith('image/')) return <Image className="w-16 h-16 text-blue-500" />;
+    if (mimeType.startsWith('video/')) return <Video className="w-16 h-16 text-purple-500" />;
+    if (mimeType.startsWith('audio/')) return <Music className="w-16 h-16 text-green-500" />;
+    if (mimeType.includes('pdf')) return <FileText className="w-16 h-16 text-red-500" />;
+    if (mimeType.includes('word') || mimeType.includes('document')) return <FileText className="w-16 h-16 text-blue-600" />;
+    if (mimeType.includes('sheet') || mimeType.includes('excel')) return <FileSpreadsheet className="w-16 h-16 text-green-600" />;
+    if (mimeType.includes('presentation') || mimeType.includes('powerpoint')) return <Presentation className="w-16 h-16 text-orange-500" />;
+    if (mimeType.includes('javascript') || mimeType.includes('typescript') || mimeType.includes('python') || 
+        mimeType.includes('java') || mimeType.includes('json') || mimeType.includes('xml') || 
+        mimeType.includes('html') || mimeType.includes('css') || mimeType.includes('text/')) return <FileCode className="w-16 h-16 text-yellow-500" />;
+    if (mimeType.includes('zip') || mimeType.includes('rar') || mimeType.includes('tar') || 
+        mimeType.includes('7z') || mimeType.includes('compressed')) return <FileArchive className="w-16 h-16 text-amber-600" />;
+    return <FileIcon className="w-16 h-16 text-gray-400" />;
+  };
   
   const previewUrl = file.blobId ? getWalrusUrl(file.blobId) : null;
   const isImage = file.mimeType?.startsWith('image/');
@@ -160,7 +177,8 @@ function FilePreviewModal({ file, onClose, onRefresh }) {
             />
           ) : (
             <div className="flex flex-col items-center justify-center h-full text-center">
-              <p className="text-gray-400 mb-4">Preview not available for this file type</p>
+              {getFileIcon(file.mimeType)}
+              <p className="text-gray-400 mb-4 mt-6">Preview not available for this file type</p>
               <button
                 onClick={handleDownload}
                 className="px-4 py-2 bg-primary-600 hover:bg-primary-700 rounded-lg font-medium transition-colors flex items-center gap-2"
