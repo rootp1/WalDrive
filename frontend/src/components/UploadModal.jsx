@@ -32,11 +32,16 @@ function UploadModal({ currentFolder, onClose, onSuccess }) {
       
       const path = currentFolder ? `${currentFolder.path}/${file.name}` : file.name;
       
+      // Correct argument order for createFileTransaction:
+      // (name, encryptedBlobId, encryptedFileKey, size, mimeType, path, isPublic)
+      // Previously misordered causing size to receive mimeType string and triggering NaN -> u64 error.
+      // NOTE: This path skips encryption; we pass a placeholder encryptedFileKey. Consider switching to secure upload.
       const tx = createFileTransaction(
         file.name,
         blobId,
+        'plain-file-key', // placeholder since fast upload skips encryption here
         file.size,
-        file.type,
+        file.type || 'application/octet-stream',
         path,
         isPublic
       );
