@@ -15,7 +15,10 @@ module waldrive::file_metadata {
         mime_type: String,
         path: String,
         is_public: bool,
+        is_starred: bool,
+        is_trashed: bool,
         created_at: u64,
+        trashed_at: Option<u64>,
         share_token: Option<String>,
     }
     public struct FileCreated has copy, drop {
@@ -29,6 +32,21 @@ module waldrive::file_metadata {
         name: String,
     }
     public struct FileDeleted has copy, drop {
+        file_id: ID,
+        owner: address,
+    }
+
+    public struct FileStarred has copy, drop {
+        file_id: ID,
+        is_starred: bool,
+    }
+
+    public struct FileTrashed has copy, drop {
+        file_id: ID,
+        is_trashed: bool,
+    }
+
+    public struct FileRestored has copy, drop {
         file_id: ID,
         owner: address,
     }
@@ -62,7 +80,10 @@ module waldrive::file_metadata {
             mime_type,
             path,
             is_public,
+            is_starred: false,
+            is_trashed: false,
             created_at: clock::timestamp_ms(clock),
+            trashed_at: option::none(),
             share_token: option::none(),
         };
         event::emit(FileCreated {
@@ -97,6 +118,18 @@ module waldrive::file_metadata {
     public fun created_at(file: &FileMetadata): u64 {
         file.created_at
     }
+
+    public fun is_starred(file: &FileMetadata): bool {
+        file.is_starred
+    }
+
+    public fun is_trashed(file: &FileMetadata): bool {
+        file.is_trashed
+    }
+
+    public fun trashed_at(file: &FileMetadata): Option<u64> {
+        file.trashed_at
+    }
     public fun share_token(file: &FileMetadata): Option<String> {
         file.share_token
     }
@@ -120,6 +153,35 @@ module waldrive::file_metadata {
         assert!(file.owner == ctx.sender(), ENotOwner);
         file.share_token = option::some(token);
     }
+
+    public entry fun toggle_star(file: &mut FileMetadata, ctx: &TxContext) {
+        assert!(file.owner == ctx.sender(), ENotOwner);
+        file.is_starred = !file.is_starred;
+        event::emit(FileStarred {
+            file_id: object::id(file),
+            is_starred: file.is_starred,
+        });
+    }
+
+    public entry fun move_to_trash(file: &mut FileMetadata, clock: &Clock, ctx: &TxContext) {
+        assert!(file.owner == ctx.sender(), ENotOwner);
+        file.is_trashed = true;
+        file.trashed_at = option::some(clock::timestamp_ms(clock));
+        event::emit(FileTrashed {
+            file_id: object::id(file),
+            is_trashed: true,
+        });
+    }
+
+    public entry fun restore_from_trash(file: &mut FileMetadata, ctx: &TxContext) {
+        assert!(file.owner == ctx.sender(), ENotOwner);
+        file.is_trashed = false;
+        file.trashed_at = option::none();
+        event::emit(FileRestored {
+            file_id: object::id(file),
+            owner: file.owner,
+        });
+    }
     public entry fun transfer_file(file: FileMetadata, to: address, ctx: &TxContext) {
         let from = file.owner;
         event::emit(FileTransferred {
@@ -140,7 +202,10 @@ module waldrive::file_metadata {
             mime_type: _,
             path: _,
             is_public: _,
+            is_starred: _,
+            is_trashed: _,
             created_at: _,
+            trashed_at: _,
             share_token: _,
         } = file;
         event::emit(FileDeleted {
