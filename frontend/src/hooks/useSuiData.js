@@ -30,21 +30,29 @@ export const useUserFiles = () => {
 
       const fileData = objects.data.map(obj => {
         const content = obj.data.content.fields;
-        
+
+        // Determine encryption status: new secure files have encrypted_blob_id & encrypted_file_key.
+        const hasEncrypted = !!content.encrypted_blob_id && !!content.encrypted_file_key;
+        const rawBlobId = content.blob_id; // legacy field (might be absent in new secure uploads)
+
         const fileObj = {
           id: obj.data.objectId,
-          name: content.name,
-          blobId: content.blob_id,
-          size: parseInt(content.size),
-          mimeType: content.mime_type,
-          isPublic: content.is_public,
-          createdAt: parseInt(content.created_at),
-          path: content.path,
-          shareToken: content.share_token,
-          owner: content.owner,
+            name: content.name,
+            // Only expose blobId when raw (legacy) present; secure files rely on encrypted fields
+            blobId: hasEncrypted ? null : rawBlobId,
+            encryptedBlobId: hasEncrypted ? content.encrypted_blob_id : null,
+            encryptedFileKey: hasEncrypted ? content.encrypted_file_key : null,
+            isEncrypted: hasEncrypted,
+            size: parseInt(content.size),
+            mimeType: content.mime_type,
+            isPublic: content.is_public,
+            createdAt: parseInt(content.created_at),
+            path: content.path,
+            shareToken: content.share_token,
+            owner: content.owner,
         };
-        
-        console.log('📄 File:', fileObj.name, 'path:', fileObj.path);
+
+        console.log('📄 File:', fileObj.name, 'encrypted:', fileObj.isEncrypted, 'path:', fileObj.path);
         return fileObj;
       });
 

@@ -1,12 +1,25 @@
 import { X, Download, Share2, Lock, Globe, ExternalLink, FileText, Image, Video, Music, File as FileIcon, FileCode, FileArchive, FileSpreadsheet, Presentation } from 'lucide-react';
 import { useState } from 'react';
 import { getWalrusUrl } from '../services/walrus';
+import { downloadSecureFile } from '../services/secureFiles';
+import { useCurrentAccount } from '@mysten/dapp-kit';
 import { toggleFilePublicTransaction } from '../services/sui';
 import { useSignAndExecuteTransaction } from '@mysten/dapp-kit';
 
 function FilePreviewModal({ file, onClose, onRefresh }) {
   const [loading, setLoading] = useState(false);
   const { mutate: signAndExecute } = useSignAndExecuteTransaction();
+  const currentAccount = useCurrentAccount();
+  // Fallback signer for message-based key derivation; expects wallet global or returns error.
+  const signMessage = async ({ message }) => {
+    // If a global wallet API with signMessage exists, use it; otherwise throw.
+    const hex = Array.from(message).map(b => b.toString(16).padStart(2,'0')).join('');
+    if (window?.wallet?.signMessage) {
+      const res = await window.wallet.signMessage({ message });
+      return { signature: res.signature || res }; // normalize
+    }
+    throw new Error('Message signing not available: wallet adapter missing signMessage');
+  };
   
   const getFileIcon = (mimeType) => {
     if (!mimeType) return <FileIcon className="w-16 h-16 text-gray-400" />;
@@ -25,27 +38,61 @@ function FilePreviewModal({ file, onClose, onRefresh }) {
     return <FileIcon className="w-16 h-16 text-gray-400" />;
   };
   
+  // For legacy (unencrypted) files we build direct Walrus URL; for encrypted we defer until decrypted.
   const previewUrl = file.blobId ? getWalrusUrl(file.blobId) : null;
   const isImage = file.mimeType?.startsWith('image/');
   const isVideo = file.mimeType?.startsWith('video/');
   const isAudio = file.mimeType?.startsWith('audio/');
   const isPDF = file.mimeType?.includes('pdf');
-  const handleDownload = () => {
-    if (!file.blobId) {
-      alert('No blob ID available for download');
-      return;
+  const handleDownload = async () => {
+    try {
+      if (file.isEncrypted) {
+        if (!currentAccount) {
+          alert('Wallet not connected');
+          return;
+        }
+        // Use secure download path
+        const decryptedFile = await downloadSecureFile(
+          {
+            name: file.name,
+            mime_type: file.mimeType,
+            encrypted_blob_id: file.encryptedBlobId,
+            encrypted_file_key: file.encryptedFileKey,
+          },
+          signMessage,
+          currentAccount.address,
+          (p) => {
+            // Optional: could wire progress bar later
+          }
+        );
+        // Trigger browser save
+        const url = URL.createObjectURL(decryptedFile);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = decryptedFile.name;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+        return;
+      }
+      if (!file.blobId) {
+        alert('No blob ID available for download');
+        return;
+      }
+      const walrusUrl = getWalrusUrl(file.blobId);
+      console.log('🔗 Downloading from Walrus:', walrusUrl);
+      const link = document.createElement('a');
+      link.href = walrusUrl;
+      link.setAttribute('download', file.name);
+      link.setAttribute('target', '_blank');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (e) {
+      console.error('Secure download failed:', e);
+      alert('Download failed: ' + e.message);
     }
-    
-    const walrusUrl = getWalrusUrl(file.blobId);
-    console.log('🔗 Downloading from Walrus:', walrusUrl);
-    
-    const link = document.createElement('a');
-    link.href = walrusUrl;
-    link.setAttribute('download', file.name);
-    link.setAttribute('target', '_blank');
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
   };
 
   const handleTogglePublic = () => {
@@ -139,7 +186,19 @@ function FilePreviewModal({ file, onClose, onRefresh }) {
         </div>
         {}
         <div className="flex-1 overflow-auto custom-scrollbar p-4">
-          {!previewUrl ? (
+          {file.isEncrypted && !previewUrl ? (
+            <div className="flex flex-col items-center justify-center h-full gap-4">
+              <Lock className="w-16 h-16 text-primary-500" />
+              <p className="text-gray-400 text-sm max-w-sm text-center">This file is end-to-end encrypted. Use the download button to decrypt locally.</p>
+              <button
+                onClick={handleDownload}
+                className="px-4 py-2 bg-primary-600 hover:bg-primary-700 rounded-lg font-medium transition-colors flex items-center gap-2"
+              >
+                <Download className="w-4 h-4" />
+                Decrypt & Download
+              </button>
+            </div>
+          ) : !previewUrl ? (
             <div className="flex items-center justify-center h-full">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
             </div>
