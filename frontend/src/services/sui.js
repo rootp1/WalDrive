@@ -1,14 +1,15 @@
 import { Transaction } from '@mysten/sui/transactions';
 import { PACKAGE_ID, MODULE_NAMES } from '../config/contracts';
 
-export const createFileTransaction = (name, blobId, size, mimeType, path, isPublic) => {
+export const createFileTransaction = (name, encryptedBlobId, encryptedFileKey, size, mimeType, path, isPublic) => {
   const tx = new Transaction();
   
   tx.moveCall({
     target: `${PACKAGE_ID}::${MODULE_NAMES.FILE_METADATA}::create_file`,
     arguments: [
       tx.pure.string(name),
-      tx.pure.string(blobId),
+      tx.pure.string(encryptedBlobId),
+      tx.pure.string(encryptedFileKey),
       tx.pure.u64(size),
       tx.pure.string(mimeType),
       tx.pure.string(path),
@@ -117,7 +118,7 @@ export const moveToTrashTransaction = (fileId) => {
     target: `${PACKAGE_ID}::${MODULE_NAMES.FILE_METADATA}::move_to_trash`,
     arguments: [
       tx.object(fileId),
-      tx.object('0x6'), // Clock object
+      tx.object('0x6'), 
     ],
   });
   

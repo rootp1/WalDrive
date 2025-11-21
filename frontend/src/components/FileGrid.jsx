@@ -292,7 +292,7 @@ function FileGrid({ files, folders, onRefresh, onFolderOpen }) {
         />
       )}
 
-      {/* Context Menu */}
+      {}
       {contextMenu && (
         <ContextMenu
           x={contextMenu.x}

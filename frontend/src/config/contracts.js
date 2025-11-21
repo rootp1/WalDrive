@@ -1,5 +1,8 @@
 export const NETWORK = 'testnet';
-export const PACKAGE_ID = '0xdce5e45a868c9e1fa7eae5bb1ce3f643447b499006ae0ceb808a9de30b57d827';
+
+// Updated Package ID - Deployed Nov 22, 2025 with encryption support
+export const PACKAGE_ID = '0x2d03a7adc710f393b3e9306acb741747adc13559f2734099d700ce9de4f314a6';
+
 export const MODULE_NAMES = {
   FILE_METADATA: 'file_metadata',
   FOLDER_REGISTRY: 'folder_registry',

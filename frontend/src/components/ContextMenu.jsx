@@ -40,7 +40,7 @@ function ContextMenu({ x, y, file, onClose, onAction, isStarred, isTrashed }) {
     { icon: Trash2, label: 'Move to trash', action: 'trash', shortcut: 'Delete', color: 'text-gray-400' },
   ];
 
-  // Adjust position if menu would go off screen
+  
   const adjustedX = x;
   const adjustedY = y;
 

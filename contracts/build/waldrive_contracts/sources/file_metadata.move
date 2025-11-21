@@ -9,7 +9,8 @@ module waldrive::file_metadata {
     public struct FileMetadata has key, store {
         id: UID,
         name: String,
-        blob_id: String,
+        encrypted_blob_id: String,      // Encrypted Walrus blob ID
+        encrypted_file_key: String,     // Encrypted file decryption key
         owner: address,
         size: u64,
         mime_type: String,
@@ -24,7 +25,6 @@ module waldrive::file_metadata {
     public struct FileCreated has copy, drop {
         file_id: ID,
         owner: address,
-        blob_id: String,
         name: String,
     }
     public struct FileUpdated has copy, drop {
@@ -60,7 +60,8 @@ module waldrive::file_metadata {
     const EInvalidSize: u64 = 2;
     public entry fun create_file(
         name: String,
-        blob_id: String,
+        encrypted_blob_id: String,
+        encrypted_file_key: String,
         size: u64,
         mime_type: String,
         path: String,
@@ -74,7 +75,8 @@ module waldrive::file_metadata {
         let file = FileMetadata {
             id: uid,
             name,
-            blob_id,
+            encrypted_blob_id,
+            encrypted_file_key,
             owner: sender,
             size,
             mime_type,
@@ -89,7 +91,6 @@ module waldrive::file_metadata {
         event::emit(FileCreated {
             file_id,
             owner: sender,
-            blob_id: file.blob_id,
             name: file.name,
         });
         transfer::public_transfer(file, sender);
@@ -97,8 +98,12 @@ module waldrive::file_metadata {
     public fun name(file: &FileMetadata): String {
         file.name
     }
-    public fun blob_id(file: &FileMetadata): String {
-        file.blob_id
+    public fun encrypted_blob_id(file: &FileMetadata): String {
+        file.encrypted_blob_id
+    }
+    
+    public fun encrypted_file_key(file: &FileMetadata): String {
+        file.encrypted_file_key
     }
     public fun owner(file: &FileMetadata): address {
         file.owner
@@ -196,7 +201,8 @@ module waldrive::file_metadata {
         let FileMetadata { 
             id,
             name: _,
-            blob_id: _,
+            encrypted_blob_id: _,
+            encrypted_file_key: _,
             owner,
             size: _,
             mime_type: _,

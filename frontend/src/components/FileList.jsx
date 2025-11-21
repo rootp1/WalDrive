@@ -167,11 +167,11 @@ function FileList({ files, folders, onRefresh, onFolderOpen }) {
         handlePermanentDelete(file.id);
         break;
       case 'rename':
-        // TODO: Implement rename functionality
+        
         alert('Rename functionality coming soon!');
         break;
       case 'organize':
-        // TODO: Implement organize functionality
+        
         alert('Organize functionality coming soon!');
         break;
       default:
@@ -324,7 +324,7 @@ function FileList({ files, folders, onRefresh, onFolderOpen }) {
         />
       )}
 
-      {/* Context Menu */}
+      {}
       {contextMenu && (
         <ContextMenu
           x={contextMenu.x}
