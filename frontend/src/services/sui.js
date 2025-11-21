@@ -4,10 +4,24 @@ import { PACKAGE_ID, MODULE_NAMES } from '../config/contracts';
 export const createFileTransaction = (name, encryptedBlobId, encryptedFileKey, size, mimeType, path, isPublic) => {
   const tx = new Transaction();
   
+  // Defensive preview handling: ensure we don't call substring on a non-string value.
+  const preview = (val) => {
+    if (typeof val !== 'string') {
+      try {
+        // Attempt to coerce to string safely
+        const coerced = String(val);
+        return coerced.length > 20 ? coerced.slice(0, 20) + '...' : coerced;
+      } catch {
+        return '[non-string]';
+      }
+    }
+    return val.length > 20 ? val.substring(0, 20) + '...' : val;
+  };
+
   console.log('Creating file transaction with:', {
     name,
-    encryptedBlobId: encryptedBlobId?.substring(0, 20) + '...',
-    encryptedFileKey: encryptedFileKey?.substring(0, 20) + '...',
+    encryptedBlobId: preview(encryptedBlobId),
+    encryptedFileKey: preview(encryptedFileKey),
     size,
     mimeType,
     path,
