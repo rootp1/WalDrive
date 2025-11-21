@@ -1,4 +1,4 @@
-import { Folder, FileText, Image, Video, Music, File as FileIcon, Download, Trash2, Share2, Eye, Lock, Globe, FileCode, FileArchive, FileSpreadsheet, Presentation } from 'lucide-react';
+import { Folder, FileText, Image, Video, Music, File as FileIcon, Download, Trash2, Share2, Eye, Lock, Globe, FileCode, FileArchive, FileSpreadsheet, Presentation, Star, Info } from 'lucide-react';
 import { useState } from 'react';
 import FilePreviewModal from './FilePreviewModal';
 import ShareModal from './ShareModal';
@@ -10,6 +10,7 @@ function FileList({ files, folders, onRefresh, onFolderOpen }) {
   const [showPreview, setShowPreview] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [fileToShare, setFileToShare] = useState(null);
+  const [starredFiles, setStarredFiles] = useState(new Set());
   const { mutate: signAndExecute } = useSignAndExecuteTransaction();
   const getFileIcon = (mimeType) => {
     if (!mimeType) return <FileIcon className="w-5 h-5 text-gray-400" />;
@@ -80,6 +81,22 @@ function FileList({ files, folders, onRefresh, onFolderOpen }) {
     setFileToShare(file);
     setShowShareModal(true);
   };
+
+  const handleToggleStar = (fileId) => {
+    setStarredFiles(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(fileId)) {
+        newSet.delete(fileId);
+      } else {
+        newSet.add(fileId);
+      }
+      return newSet;
+    });
+  };
+
+  const handleShowInfo = (file) => {
+    alert(`File Information:\n\nName: ${file.name}\nSize: ${formatFileSize(file.size)}\nType: ${file.mimeType}\nCreated: ${new Date(file.createdAt).toLocaleString()}\nBlob ID: ${file.blobId}\nPublic: ${file.isPublic ? 'Yes' : 'No'}`);
+  };
   const formatFileSize = (bytes) => {
     if (bytes === 0) return '0 B';
     const k = 1024;
@@ -129,13 +146,17 @@ function FileList({ files, folders, onRefresh, onFolderOpen }) {
               </td>
             </tr>
           ))}
-          {}
           {files.map((file) => (
             <tr key={file.id} className="border-b border-gray-800/50 hover:bg-[#202020] transition-colors group">
               <td className="px-6 py-4">
                 <div className="flex items-center gap-3">
                   {getFileIcon(file.mimeType)}
-                  <span className="text-gray-200 truncate text-sm font-normal">{file.name}</span>
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <span className="text-gray-200 truncate text-sm font-normal">{file.name}</span>
+                    {starredFiles.has(file.id) && (
+                      <Star className="w-3.5 h-3.5 fill-yellow-500 text-yellow-500 flex-shrink-0" />
+                    )}
+                  </div>
                 </div>
               </td>
               <td className="px-6 py-4 text-sm text-gray-500 hidden md:table-cell">
@@ -160,7 +181,18 @@ function FileList({ files, folders, onRefresh, onFolderOpen }) {
               <td className="px-6 py-4">
                 <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                   <button
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleToggleStar(file.id);
+                    }}
+                    className={`icon-btn p-1.5 ${starredFiles.has(file.id) ? 'text-yellow-500' : ''}`}
+                    title={starredFiles.has(file.id) ? "Unstar" : "Star"}
+                  >
+                    <Star className={`w-4 h-4 ${starredFiles.has(file.id) ? 'fill-yellow-500 text-yellow-500' : 'text-gray-400'}`} />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
                       setSelectedFile(file);
                       setShowPreview(true);
                     }}
@@ -170,23 +202,42 @@ function FileList({ files, folders, onRefresh, onFolderOpen }) {
                     <Eye className="w-4 h-4 text-gray-400" />
                   </button>
                   <button
-                    onClick={() => handleDownload(file)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDownload(file);
+                    }}
                     className="icon-btn p-1.5"
                     title="Download"
                   >
                     <Download className="w-4 h-4 text-gray-400" />
                   </button>
                   <button
-                    onClick={() => handleShare(file)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleShare(file);
+                    }}
                     className="icon-btn p-1.5"
                     title="Share"
                   >
                     <Share2 className="w-4 h-4 text-gray-400" />
                   </button>
                   <button
-                    onClick={() => handleDelete(file.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleShowInfo(file);
+                    }}
+                    className="icon-btn p-1.5"
+                    title="File Info"
+                  >
+                    <Info className="w-4 h-4 text-gray-400" />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(file.id);
+                    }}
                     className="icon-btn p-1.5 hover:bg-red-900/20"
-                    title="Delete"
+                    title="Move to Trash"
                   >
                     <Trash2 className="w-4 h-4 text-red-400" />
                   </button>
