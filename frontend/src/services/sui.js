@@ -3,6 +3,17 @@ import { PACKAGE_ID, MODULE_NAMES } from '../config/contracts';
 
 export const createFileTransaction = (name, encryptedBlobId, encryptedFileKey, size, mimeType, path, isPublic) => {
   const tx = new Transaction();
+  // Sanitize and validate size early to avoid NaN / non-integer issues when converting to u64
+  const rawSize = size;
+  const numericSize = Number(rawSize);
+  if (!Number.isFinite(numericSize) || numericSize < 0) {
+    throw new Error(`Invalid file size '${rawSize}' (must be a finite, non-negative integer).`);
+  }
+  if (!Number.isInteger(numericSize)) {
+    // File.size should always be integer; truncate rather than allow fractional.
+    console.warn(`File size not integer (${numericSize}); truncating.`);
+  }
+  const sanitizedSize = Math.trunc(numericSize);
   
   // Defensive preview handling: ensure we don't call substring on a non-string value.
   const preview = (val) => {
@@ -22,7 +33,7 @@ export const createFileTransaction = (name, encryptedBlobId, encryptedFileKey, s
     name,
     encryptedBlobId: preview(encryptedBlobId),
     encryptedFileKey: preview(encryptedFileKey),
-    size,
+    size: sanitizedSize,
     mimeType,
     path,
     isPublic
@@ -34,7 +45,7 @@ export const createFileTransaction = (name, encryptedBlobId, encryptedFileKey, s
       tx.pure.string(String(name)),
       tx.pure.string(String(encryptedBlobId)),
       tx.pure.string(String(encryptedFileKey)),
-      tx.pure.u64(Number(size)),
+      tx.pure.u64(sanitizedSize),
       tx.pure.string(String(mimeType)),
       tx.pure.string(String(path)),
       tx.pure.bool(Boolean(isPublic)),
