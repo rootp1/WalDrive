@@ -126,6 +126,24 @@ export async function downloadSecureFile(
   onProgress
 ) {
   try {
+    // Legacy fallback: if encrypted fields absent but raw blob_id present, perform direct download without decryption.
+    const hasEncrypted = !!fileMetadata?.encrypted_blob_id && !!fileMetadata?.encrypted_file_key;
+    const hasRawBlob = !!fileMetadata?.blob_id;
+    if (!hasEncrypted && hasRawBlob) {
+      // Direct, non-secure path (pre-encryption upload). Warn and stream raw file.
+      console.warn('Legacy (unencrypted) file detected. Proceeding without decryption. File ID:', fileMetadata?.id);
+      if (onProgress) onProgress({ step: 'downloading', progress: 0.3 });
+      const walrusUrl = getWalrusUrl(fileMetadata.blob_id);
+      const response = await fetch(walrusUrl);
+      if (!response.ok) throw new Error(`Failed to fetch legacy file: ${response.status}`);
+      const rawBlob = await response.blob();
+      if (onProgress) onProgress({ step: 'complete', progress: 1.0 });
+      // Return a File instance matching expected signature.
+      return new File([rawBlob], fileMetadata.name, { type: fileMetadata.mime_type || 'application/octet-stream' });
+    }
+    if (!hasEncrypted) {
+      throw new Error('Missing encrypted blob data; cannot download file.');
+    }
     
     if (onProgress) onProgress({ step: 'authenticating', progress: 0.1 });
     
