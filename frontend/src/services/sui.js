@@ -98,3 +98,50 @@ export const createShareCapabilityTransaction = (fileId, sharedWith, canWrite, c
   
   return tx;
 };
+
+export const toggleStarTransaction = (fileId) => {
+  const tx = new Transaction();
+  
+  tx.moveCall({
+    target: `${PACKAGE_ID}::${MODULE_NAMES.FILE_METADATA}::toggle_star`,
+    arguments: [tx.object(fileId)],
+  });
+  
+  return tx;
+};
+
+export const moveToTrashTransaction = (fileId) => {
+  const tx = new Transaction();
+  
+  tx.moveCall({
+    target: `${PACKAGE_ID}::${MODULE_NAMES.FILE_METADATA}::move_to_trash`,
+    arguments: [
+      tx.object(fileId),
+      tx.object('0x6'), // Clock object
+    ],
+  });
+  
+  return tx;
+};
+
+export const restoreFromTrashTransaction = (fileId) => {
+  const tx = new Transaction();
+  
+  tx.moveCall({
+    target: `${PACKAGE_ID}::${MODULE_NAMES.FILE_METADATA}::restore_from_trash`,
+    arguments: [tx.object(fileId)],
+  });
+  
+  return tx;
+};
+
+export const permanentlyDeleteFileTransaction = (fileId) => {
+  const tx = new Transaction();
+  
+  tx.moveCall({
+    target: `${PACKAGE_ID}::${MODULE_NAMES.FILE_METADATA}::delete_file`,
+    arguments: [tx.object(fileId)],
+  });
+  
+  return tx;
+};

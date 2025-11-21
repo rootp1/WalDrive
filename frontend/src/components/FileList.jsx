@@ -1,16 +1,17 @@
-import { Folder, FileText, Image, Video, Music, File as FileIcon, Download, Trash2, Share2, Eye, Lock, Globe, FileCode, FileArchive, FileSpreadsheet, Presentation, Star, Info } from 'lucide-react';
+import { Folder, FileText, Image, Video, Music, File as FileIcon, Download, Trash2, Share2, Eye, Lock, Globe, FileCode, FileArchive, FileSpreadsheet, Presentation, Star, Info, MoreVertical } from 'lucide-react';
 import { useState } from 'react';
 import FilePreviewModal from './FilePreviewModal';
 import ShareModal from './ShareModal';
+import ContextMenu from './ContextMenu';
 import { useSignAndExecuteTransaction } from '@mysten/dapp-kit';
-import { deleteFileTransaction, toggleFilePublicTransaction } from '../services/sui';
+import { deleteFileTransaction, toggleFilePublicTransaction, toggleStarTransaction, moveToTrashTransaction, restoreFromTrashTransaction, permanentlyDeleteFileTransaction } from '../services/sui';
 import { getWalrusUrl } from '../services/walrus';
 function FileList({ files, folders, onRefresh, onFolderOpen }) {
   const [selectedFile, setSelectedFile] = useState(null);
   const [showPreview, setShowPreview] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [fileToShare, setFileToShare] = useState(null);
-  const [starredFiles, setStarredFiles] = useState(new Set());
+  const [contextMenu, setContextMenu] = useState(null);
   const { mutate: signAndExecute } = useSignAndExecuteTransaction();
   const getFileIcon = (mimeType) => {
     if (!mimeType) return <FileIcon className="w-5 h-5 text-gray-400" />;
@@ -63,18 +64,18 @@ function FileList({ files, folders, onRefresh, onFolderOpen }) {
   };
 
   const handleDelete = async (fileId) => {
-    if (!confirm('Are you sure you want to delete this file?')) return;
+    if (!confirm('Are you sure you want to move this file to trash?')) return;
     try {
-      const tx = deleteFileTransaction(fileId);
+      const tx = moveToTrashTransaction(fileId);
       signAndExecute(
         { transaction: tx },
         {
           onSuccess: () => onRefresh(),
-          onError: (error) => alert('Failed to delete file: ' + error.message)
+          onError: (error) => alert('Failed to move file to trash: ' + error.message)
         }
       );
     } catch (error) {
-      alert('Failed to delete file');
+      alert('Failed to move file to trash');
     }
   };
   const handleShare = (file) => {
@@ -83,15 +84,99 @@ function FileList({ files, folders, onRefresh, onFolderOpen }) {
   };
 
   const handleToggleStar = (fileId) => {
-    setStarredFiles(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(fileId)) {
-        newSet.delete(fileId);
-      } else {
-        newSet.add(fileId);
-      }
-      return newSet;
+    try {
+      const tx = toggleStarTransaction(fileId);
+      signAndExecute(
+        { transaction: tx },
+        {
+          onSuccess: () => onRefresh(),
+          onError: (error) => alert('Failed to toggle star: ' + error.message)
+        }
+      );
+    } catch (error) {
+      alert('Failed to toggle star');
+    }
+  };
+
+  const handleRestore = (fileId) => {
+    try {
+      const tx = restoreFromTrashTransaction(fileId);
+      signAndExecute(
+        { transaction: tx },
+        {
+          onSuccess: () => onRefresh(),
+          onError: (error) => alert('Failed to restore file: ' + error.message)
+        }
+      );
+    } catch (error) {
+      alert('Failed to restore file');
+    }
+  };
+
+  const handlePermanentDelete = (fileId) => {
+    if (!confirm('Are you sure you want to permanently delete this file? This cannot be undone.')) return;
+    try {
+      const tx = permanentlyDeleteFileTransaction(fileId);
+      signAndExecute(
+        { transaction: tx },
+        {
+          onSuccess: () => onRefresh(),
+          onError: (error) => alert('Failed to delete file permanently: ' + error.message)
+        }
+      );
+    } catch (error) {
+      alert('Failed to delete file permanently');
+    }
+  };
+
+  const handleContextMenu = (e, file) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setContextMenu({
+      x: e.clientX,
+      y: e.clientY,
+      file: file
     });
+  };
+
+  const handleContextAction = (action, file) => {
+    switch (action) {
+      case 'preview':
+        setSelectedFile(file);
+        setShowPreview(true);
+        break;
+      case 'download':
+        handleDownload(file);
+        break;
+      case 'star':
+        handleToggleStar(file.id);
+        break;
+      case 'share':
+        handleShare(file);
+        break;
+      case 'info':
+        handleShowInfo(file);
+        break;
+      case 'trash':
+        handleDelete(file.id);
+        break;
+      case 'restore':
+        handleRestore(file.id);
+        break;
+      case 'permanentDelete':
+        handlePermanentDelete(file.id);
+        break;
+      case 'rename':
+        // TODO: Implement rename functionality
+        alert('Rename functionality coming soon!');
+        break;
+      case 'organize':
+        // TODO: Implement organize functionality
+        alert('Organize functionality coming soon!');
+        break;
+      default:
+        break;
+    }
   };
 
   const handleShowInfo = (file) => {
@@ -147,14 +232,23 @@ function FileList({ files, folders, onRefresh, onFolderOpen }) {
             </tr>
           ))}
           {files.map((file) => (
-            <tr key={file.id} className="border-b border-gray-800/50 hover:bg-[#202020] transition-colors group">
+            <tr 
+              key={file.id} 
+              className="border-b border-gray-800/50 hover:bg-[#202020] transition-colors group"
+              onContextMenu={(e) => handleContextMenu(e, file)}
+            >
               <td className="px-6 py-4">
                 <div className="flex items-center gap-3">
                   {getFileIcon(file.mimeType)}
                   <div className="flex items-center gap-2 flex-1 min-w-0">
-                    <span className="text-gray-200 truncate text-sm font-normal">{file.name}</span>
-                    {starredFiles.has(file.id) && (
+                    <span className={`text-gray-200 truncate text-sm font-normal ${file.isStarred ? 'font-medium' : ''}`}>
+                      {file.name}
+                    </span>
+                    {file.isStarred && (
                       <Star className="w-3.5 h-3.5 fill-yellow-500 text-yellow-500 flex-shrink-0" />
+                    )}
+                    {file.isTrashed && (
+                      <span className="text-xs text-red-400 ml-2">(Trashed)</span>
                     )}
                   </div>
                 </div>
@@ -179,67 +273,23 @@ function FileList({ files, folders, onRefresh, onFolderOpen }) {
                 )}
               </td>
               <td className="px-6 py-4">
-                <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                <div className="flex items-center justify-end gap-1">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       handleToggleStar(file.id);
                     }}
-                    className={`icon-btn p-1.5 ${starredFiles.has(file.id) ? 'text-yellow-500' : ''}`}
-                    title={starredFiles.has(file.id) ? "Unstar" : "Star"}
+                    className={`icon-btn p-1.5 opacity-0 group-hover:opacity-100 transition-opacity ${file.isStarred ? 'opacity-100' : ''}`}
+                    title={file.isStarred ? "Unstar" : "Star"}
                   >
-                    <Star className={`w-4 h-4 ${starredFiles.has(file.id) ? 'fill-yellow-500 text-yellow-500' : 'text-gray-400'}`} />
+                    <Star className={`w-4 h-4 ${file.isStarred ? 'fill-yellow-500 text-yellow-500' : 'text-gray-400'}`} />
                   </button>
                   <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedFile(file);
-                      setShowPreview(true);
-                    }}
-                    className="icon-btn p-1.5"
-                    title="Preview"
+                    onClick={(e) => handleContextMenu(e, file)}
+                    className="icon-btn p-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                    title="More options"
                   >
-                    <Eye className="w-4 h-4 text-gray-400" />
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDownload(file);
-                    }}
-                    className="icon-btn p-1.5"
-                    title="Download"
-                  >
-                    <Download className="w-4 h-4 text-gray-400" />
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleShare(file);
-                    }}
-                    className="icon-btn p-1.5"
-                    title="Share"
-                  >
-                    <Share2 className="w-4 h-4 text-gray-400" />
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleShowInfo(file);
-                    }}
-                    className="icon-btn p-1.5"
-                    title="File Info"
-                  >
-                    <Info className="w-4 h-4 text-gray-400" />
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDelete(file.id);
-                    }}
-                    className="icon-btn p-1.5 hover:bg-red-900/20"
-                    title="Move to Trash"
-                  >
-                    <Trash2 className="w-4 h-4 text-red-400" />
+                    <MoreVertical className="w-4 h-4 text-gray-400" />
                   </button>
                 </div>
               </td>
@@ -271,6 +321,19 @@ function FileList({ files, folders, onRefresh, onFolderOpen }) {
             setFileToShare(null);
             onRefresh();
           }}
+        />
+      )}
+
+      {/* Context Menu */}
+      {contextMenu && (
+        <ContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          file={contextMenu.file}
+          isStarred={contextMenu.file.isStarred}
+          isTrashed={contextMenu.file.isTrashed}
+          onClose={() => setContextMenu(null)}
+          onAction={handleContextAction}
         />
       )}
     </div>
