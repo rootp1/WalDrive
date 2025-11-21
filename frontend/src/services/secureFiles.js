@@ -23,6 +23,11 @@ export async function uploadSecureFile(
   onProgress
 ) {
   try {
+    // Basic upfront validation
+    if (!file) throw new Error('No file provided');
+    if (typeof file.name !== 'string') throw new Error('File name must be a string');
+    if (typeof file.size !== 'number') throw new Error('File size must be numeric');
+    if (!walletAddress) throw new Error('Missing wallet address');
     
     if (onProgress) onProgress({ step: 'encrypting', progress: 0.1 });
     
@@ -63,6 +68,17 @@ export async function uploadSecureFile(
     
     const encryptedBlobId = await encryptString(blobId, userKey);
     const encryptedFileKey = await encryptString(fileKeyBase64, userKey);
+
+    // Defensive type checks to avoid argument shifting into Move call
+    if (typeof encryptedBlobId !== 'string' || encryptedBlobId.length === 0) {
+      throw new Error('Encrypted blob id generation failed');
+    }
+    if (typeof encryptedFileKey !== 'string' || encryptedFileKey.length === 0) {
+      throw new Error('Encrypted file key generation failed');
+    }
+    if (Number.isNaN(file.size) || file.size < 0) {
+      throw new Error('Invalid file size');
+    }
     
     
     if (onProgress) onProgress({ step: 'blockchain', progress: 0.9 });
@@ -72,10 +88,19 @@ export async function uploadSecureFile(
       encryptedBlobId,
       encryptedFileKey,
       file.size,
-      file.type,
-      path,
-      isPublic
+      file.type || 'application/octet-stream',
+      path || '/',
+      !!isPublic
     );
+
+    // Optional: quick dry run (comment out if performance is an issue)
+    // try {
+    //   const dryRun = await signAndExecuteTransaction({ transaction: tx, onlyDryRun: true });
+    //   console.debug('Dry run success:', dryRun);
+    // } catch (e) {
+    //   console.warn('Dry run failed, aborting before submission:', e);
+    //   throw e;
+    // }
     
     const result = await signAndExecuteTransaction({ transaction: tx });
     
@@ -85,6 +110,10 @@ export async function uploadSecureFile(
     
   } catch (error) {
     console.error('Secure upload failed:', error);
+    // Re-map common error pattern from Sui SDK when string expected but number supplied
+    if (/Invalid string value/.test(String(error))) {
+      throw new Error('Upload aborted: Argument alignment issue (a non-string slipped into a string position). Please retry; if persists clear cache.');
+    }
     throw error;
   }
 }
