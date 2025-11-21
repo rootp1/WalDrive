@@ -4,16 +4,26 @@ import { PACKAGE_ID, MODULE_NAMES } from '../config/contracts';
 export const createFileTransaction = (name, encryptedBlobId, encryptedFileKey, size, mimeType, path, isPublic) => {
   const tx = new Transaction();
   
+  console.log('Creating file transaction with:', {
+    name,
+    encryptedBlobId: encryptedBlobId?.substring(0, 20) + '...',
+    encryptedFileKey: encryptedFileKey?.substring(0, 20) + '...',
+    size,
+    mimeType,
+    path,
+    isPublic
+  });
+  
   tx.moveCall({
     target: `${PACKAGE_ID}::${MODULE_NAMES.FILE_METADATA}::create_file`,
     arguments: [
-      tx.pure.string(name),
-      tx.pure.string(encryptedBlobId),
-      tx.pure.string(encryptedFileKey),
-      tx.pure.u64(size),
-      tx.pure.string(mimeType),
-      tx.pure.string(path),
-      tx.pure.bool(isPublic),
+      tx.pure.string(String(name)),
+      tx.pure.string(String(encryptedBlobId)),
+      tx.pure.string(String(encryptedFileKey)),
+      tx.pure.u64(Number(size)),
+      tx.pure.string(String(mimeType)),
+      tx.pure.string(String(path)),
+      tx.pure.bool(Boolean(isPublic)),
       tx.object('0x6'), 
     ],
   });
